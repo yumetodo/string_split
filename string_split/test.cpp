@@ -9,7 +9,7 @@ int main()
 	const auto s_2 = s2 | split(',') >> [](const std::string& s) {
 		return std::stoi(s);
 	};
-	s2 | split(',') >> [](const std::string& s) {
+	s2 | split(',') >> [](std::string&& s) {
 		std::cout << s << std::endl;
 	};
 	return 0;

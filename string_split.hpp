@@ -255,10 +255,54 @@ namespace detail {
 		re.emplace_back(str, current, str.size() - current);
 		return re;
 	}
+	//区切り文字1文字, has chain funcの時
+	template<
+		typename CharType, typename DelimType, typename FuncType,
+		bool is_single_char, bool is_c_str, bool is_stl_string,
+		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, is_single_char, is_c_str, is_stl_string>
+	>
+	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, is_single_char, is_c_str, is_stl_string>& info)
+		-> enable_if_t<
+			is_single_char && !is_c_str && !is_stl_string && is_same<CharType, typename SplitHelperConvFunc::char_type>::value && SplitHelperConvFunc::result_is_void,
+			void
+		>
+	{
+		size_t current = 0;
+		for (size_t found; (found = str.find_first_of(info.delim, current)) != b_str<CharType>::npos; current = found + 1) {
+			info.f(std::basic_string<CharType>(str, current, found - current));
+		}
+		str.erase(0, current);
+		info.f(std::move(str));
+	}
+	//区切り文字1文字, has chain convert funcの時
+	template<
+		typename CharType, typename DelimType, typename FuncType, 
+		bool is_single_char, bool is_c_str, bool is_stl_string,
+		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, is_single_char, is_c_str, is_stl_string> 
+	>
+	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, is_single_char, is_c_str, is_stl_string>& info)
+		-> enable_if_t<
+			is_single_char && !is_c_str && !is_stl_string && is_same<CharType, typename SplitHelperConvFunc::char_type>::value && !SplitHelperConvFunc::result_is_void,
+			vector<typename SplitHelperConvFunc::result_type>
+		>
+	{
+		vector<typename SplitHelperConvFunc::result_type> re;
+		size_t current = 0;
+		for (size_t found; (found = str.find_first_of(info.delim, current)) != b_str<CharType>::npos; current = found + 1) {
+			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
+			re.push_back(info.f(std::basic_string<CharType>(str, current, found - current)));
+		}
+		str.erase(0, current);
+		re.push_back(info.f(std::move(str)));
+		return re;
+	}
 	//区切り文字1文字の時
 	template<typename CharType, typename DelimType, bool is_single_char, bool is_c_str, bool is_stl_string>
 	auto operator| (b_str<CharType>&& str, const split_helper<DelimType, is_single_char, is_c_str, is_stl_string>& info)
-		-> enable_if_t<is_single_char && !is_c_str && !is_stl_string && is_same<CharType, typename split_helper<DelimType, is_single_char, is_c_str, is_stl_string>::char_type>::value, vector<b_str<CharType>>>
+		-> enable_if_t<
+			is_single_char && !is_c_str && !is_stl_string && is_same<CharType, typename split_helper<DelimType, is_single_char, is_c_str, is_stl_string>::char_type>::value,
+			vector<b_str<CharType>>
+		>
 	{
 		vector<b_str<CharType>> re;
 		size_t current = 0;
@@ -270,10 +314,62 @@ namespace detail {
 		re.emplace_back(std::move(str));
 		return re;
 	}
+	//区切り文字複数, has chain funcの時
+	template<
+		typename CharType, typename DelimType, typename FuncType,
+		bool is_single_char, bool is_c_str, bool is_stl_string,
+		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, is_single_char, is_c_str, is_stl_string>
+	>
+	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, is_single_char, is_c_str, is_stl_string>& info)
+		-> enable_if_t<
+			!is_single_char && (is_c_str || is_stl_string) && is_same<CharType, typename SplitHelperConvFunc::char_type>::value && SplitHelperConvFunc::result_is_void,
+			void
+		>
+	{
+		size_t current = 0;
+		for (
+			size_t found = str.find_first_of(info.delim, current);
+			current != b_str<CharType>::npos;
+			current = str.find_first_not_of(str[found], found + 1), found = str.find_first_of(info.delim, current)
+		) {
+			info.f(std::basic_string<CharType>(str, current, found - current));
+		}
+		str.erase(0, current);
+		info.f(std::move(str));
+	}
+	//区切り文字複数, has chain convert funcの時
+	template<
+		typename CharType, typename DelimType, typename FuncType,
+		bool is_single_char, bool is_c_str, bool is_stl_string,
+		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, is_single_char, is_c_str, is_stl_string>
+	>
+	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, is_single_char, is_c_str, is_stl_string>& info)
+		-> enable_if_t<
+			!is_single_char && (is_c_str || is_stl_string) && is_same<CharType, typename SplitHelperConvFunc::char_type>::value && !SplitHelperConvFunc::result_is_void,
+			vector<typename SplitHelperConvFunc::result_type>
+		>
+	{
+		vector<typename SplitHelperConvFunc::result_type> re;
+		size_t current = 0;
+		for (
+			size_t found = str.find_first_of(info.delim, current);
+			current != b_str<CharType>::npos;
+			current = str.find_first_not_of(str[found], found + 1), found = str.find_first_of(info.delim, current)
+		) {
+			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
+			re.push_back(info.f(std::basic_string<CharType>(str, current, found - current)));
+		}
+		str.erase(0, current);
+		re.push_back(info.f(std::move(str)));
+		return re;
+	}
 	//区切り文字複数の時
 	template<typename CharType, typename DelimType, bool is_single_char, bool is_c_str, bool is_stl_string>
 	auto operator| (b_str<CharType>&& str, const split_helper<DelimType, is_single_char, is_c_str, is_stl_string>& info)
-		-> enable_if_t<!is_single_char && (is_c_str || is_stl_string) && is_same<CharType, typename split_helper<DelimType, is_single_char, is_c_str, is_stl_string>::char_type>::value, vector<b_str<CharType>>>
+		-> enable_if_t<
+			!is_single_char && (is_c_str || is_stl_string) && is_same<CharType, typename split_helper<DelimType, is_single_char, is_c_str, is_stl_string>::char_type>::value,
+			vector<b_str<CharType>>
+		>
 	{
 		vector<b_str<CharType>> re;
 		size_t current = 0;
