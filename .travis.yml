@@ -20,4 +20,4 @@ install:
 language: cpp
 script:
 #  - chmod a+x ./test.sh
-  - make Debug CXX="${CXX}" && make install && ./test/bin/"${CXX}"/test.out && ./sample/bin/"${CXX}"/sample.out
+  - make Debug CXX="${CXX}" && make install CXX="${CXX}" && ./test/bin/"${CXX}"/test.out && ./sample/bin/"${CXX}"/sample.out
