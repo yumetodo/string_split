@@ -1,6 +1,8 @@
 ﻿#include <string>
 #include <vector>
 #include <type_traits>
+#include <limits>
+#include <stdexcept>
 namespace detail {
 	using std::vector;
 	template<typename CharType> using b_str = std::basic_string<CharType>;
