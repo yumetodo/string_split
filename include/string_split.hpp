@@ -402,7 +402,7 @@ namespace detail {
 }
 template<typename CharType, typename std::enable_if<detail::type_traits::is_char_type<CharType>::value, std::nullptr_t>::type = nullptr>
 detail::split_helper<CharType, true, false, false> split(CharType delim) noexcept { return{ delim }; }
-template<typename CStr, std::enable_if_t<detail::type_traits::is_c_str<CStr>::value, std::nullptr_t> = nullptr>
+template<typename CStr, typename std::enable_if<detail::type_traits::is_c_str<CStr>::value, std::nullptr_t>::type = nullptr>
 detail::split_helper<CStr, false, true, false> split(CStr delim) noexcept { return{ delim }; }
-template<typename StlString, std::enable_if_t<detail::type_traits::is_stl_string<StlString>::value, std::nullptr_t> = nullptr>
+template<typename StlString, typename std::enable_if<detail::type_traits::is_stl_string<StlString>::value, std::nullptr_t>::type = nullptr>
 detail::split_helper<StlString, false, false, true> split(StlString delim) noexcept { return{ std::move(delim) }; }

@@ -33,6 +33,6 @@ int main()
 Temporary ``std::vector<std::string>`` **will not be created** becase the priority of ``operator[]/operator>>`` is higher than ``operator|``
 
 # Compiler require
-C++14 support is required.
+C++11 support is required(need C++14 support is required to compile testcase).
 
 However, we support Visual Studio 2015 update2 or later.
