@@ -37,4 +37,4 @@ clean:
 # make install
 .PHONY: install
 install:
-	mkdir bin && cp $(TARGET) bin/$(TARGET)
+	mkdir -p bin/$(CXX) && cp $(TARGET) bin/$(CXX)/$(TARGET)
