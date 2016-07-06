@@ -16,12 +16,12 @@ before_script:
   - git submodule init
   - git submodule update
   - make -C iutest/tools/fused
-#  - mkdir -p shippable/testresults
+  - mkdir -p shippable/testresults
 
 script:
   - cd iutest/tools/wandbox
   - python ./iuwandbox.py --list_options ${WANDBOX_COMPILER}
-  - python ./iuwandbox.py ../../../test/test.cpp -c ${WANDBOX_COMPILER} --default --encoding utf-8-sig --verbose
+  - python ./iuwandbox.py ../../../test/test.cpp -c ${WANDBOX_COMPILER} --default --encoding utf-8-sig --verbose --junit ../../../shippable/testresults/test_result.xml
 
 env:
   matrix:
