@@ -1,5 +1,6 @@
 # string split like chain method
 [![Run Status](https://api.shippable.com/projects/577cc6213be4f4faa56be97c/badge?branch=master)](https://app.shippable.com/projects/577cc6213be4f4faa56be97c)
+[![Build Status](https://travis-ci.org/yumetodo/string_split.svg?branch=master)](https://travis-ci.org/yumetodo/string_split)
 
 This is a **C++ header only** library to split string.
 
