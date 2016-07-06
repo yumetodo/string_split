@@ -8,7 +8,16 @@ namespace detail {
 	template<typename CharType> using b_str = std::basic_string<CharType>;
 	using std::is_same;
 	using std::size_t;
-	using std::enable_if_t;
+	template<bool con, typename T>
+	using enable_if_t = typename std::enable_if<con, T>::type;
+	template<bool con, typename T1, typename T2>
+	using conditional_t = typename std::conditional<con, T1, T2>::type;
+	template<typename T>
+	using remove_pointer_t = typename std::remove_pointer<T>::type;
+	template<typename T>
+	using remove_reference_t = typename std::remove_reference<T>::type;
+	template<typename T>
+	using remove_cv_t = typename std::remove_cv<T>::type;
 	namespace type_traits {
 		//
 		// is_char_type
@@ -25,17 +34,17 @@ namespace detail {
 		// is_c_str
 		//
 		template<typename T>
-		struct is_c_str : std::integral_constant<bool, std::is_pointer<T>::value && is_char_type<std::remove_pointer_t<T>>::value> {};
+		struct is_c_str : std::integral_constant<bool, std::is_pointer<T>::value && is_char_type<remove_pointer_t<T>>::value> {};
 		//
 		// is_stl_string
 		//
 		template<typename T>
-		struct is_stl_string : std::conditional_t<std::is_reference<T>::value, is_stl_string<std::remove_reference_t<T>>, std::false_type> {};
+		struct is_stl_string : conditional_t<std::is_reference<T>::value, is_stl_string<remove_reference_t<T>>, std::false_type> {};
 		template<typename T> struct is_stl_string<T const> : is_stl_string<T> {};
 		template<typename T> struct is_stl_string<T volatile> : is_stl_string<T> {};
 		template<typename T> struct is_stl_string<T const volatile> : is_stl_string<T> {};
 		template<typename CharType>
-		struct is_stl_string<b_str<CharType>> : std::integral_constant<bool, is_char_type<std::remove_cv_t<CharType>>::value> {};
+		struct is_stl_string<b_str<CharType>> : std::integral_constant<bool, is_char_type<remove_cv_t<CharType>>::value> {};
 	}
 	template<typename DelimType, bool is_single_char, bool is_c_str, bool is_stl_string>
 	struct split_helper_index;
@@ -46,7 +55,7 @@ namespace detail {
 	};
 	template<typename CStr>
 	struct split_helper_index<CStr, false, true, false> {
-		using char_type = std::remove_cv_t<std::remove_pointer_t<CStr>>;
+		using char_type = remove_cv_t<remove_pointer_t<CStr>>;
 		const char_type* delim; size_t index;
 	};
 	template<typename StlString>
@@ -65,7 +74,7 @@ namespace detail {
 	};
 	template<typename CStr, typename FuncType>
 	struct split_helper_conv_func<CStr, FuncType, false, true, false> {
-		using char_type = std::remove_cv_t<std::remove_pointer_t<CStr>>;
+		using char_type = remove_cv_t<remove_pointer_t<CStr>>;
 		using result_type = decltype(std::declval<FuncType>()(std::declval<std::basic_string<char_type>>()));
 		static constexpr bool result_is_void = std::is_same<void, result_type>::value;
 		const char_type* delim; FuncType f;
@@ -89,7 +98,7 @@ namespace detail {
 	};
 	template<typename CStr>
 	struct split_helper<CStr, false, true, false> {
-		using char_type = std::remove_cv_t<std::remove_pointer_t<CStr>>;
+		using char_type = remove_cv_t<remove_pointer_t<CStr>>;
 		const char_type* delim;
 		constexpr split_helper_index<CStr, false, true, false> operator[](size_t n) const noexcept { return{ delim, n }; }
 		template<typename FuncType>
@@ -391,7 +400,7 @@ namespace detail {
 		return re;
 	}
 }
-template<typename CharType, std::enable_if_t<detail::type_traits::is_char_type<CharType>::value, std::nullptr_t> = nullptr>
+template<typename CharType, typename std::enable_if<detail::type_traits::is_char_type<CharType>::value, std::nullptr_t>::type = nullptr>
 detail::split_helper<CharType, true, false, false> split(CharType delim) noexcept { return{ delim }; }
 template<typename CStr, std::enable_if_t<detail::type_traits::is_c_str<CStr>::value, std::nullptr_t> = nullptr>
 detail::split_helper<CStr, false, true, false> split(CStr delim) noexcept { return{ delim }; }
