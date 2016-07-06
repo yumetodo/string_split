@@ -1,6 +1,6 @@
-#include "../string_split.hpp"
+﻿#include "../include/string_split.hpp"
 #include <iostream>
-int main() 
+int main()
 {
 	std::string s = "arikitari na world!";
 	const auto s_1 = s | split(' ')[1];
