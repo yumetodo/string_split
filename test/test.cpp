@@ -1,4 +1,8 @@
+﻿#ifdef __WANDBOX__
+#include "string_split.hpp"
+#else
 #include "../include/string_split.hpp"
+#endif
 #include "../iutest/include/iutest.hpp"
 #include <iostream>
 #include <array>
