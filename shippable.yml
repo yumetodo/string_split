@@ -21,7 +21,7 @@ before_script:
 script:
   - cd iutest/tools/wandbox
   - python ./iuwandbox.py --list_options ${WANDBOX_COMPILER}
-  - python ./iuwandbox.py ./../../test/test.cpp -c ${WANDBOX_COMPILER} --default --encoding utf-8-sig --verbose
+  - python ./iuwandbox.py ../../../test/test.cpp -c ${WANDBOX_COMPILER} --default --encoding utf-8-sig --verbose
 
 env:
   matrix:
