@@ -113,12 +113,8 @@ namespace detail {
 		constexpr split_helper_conv_func<StlString, FuncType, false, true, false> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
 	};
 	//区切り文字1文字, operator[]の時
-	template<typename CharType, typename DelimType>
-	auto operator| (const b_str<CharType>& str, const split_helper_index<DelimType, true, false, false>& info) 
-		-> enable_if_t<
-			is_same<CharType, typename split_helper_index<DelimType, true, false, false>::char_type>::value,
-			b_str<CharType>
-		>
+	template<typename CharType>
+	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_index<CharType, true, false, false>& info)
 	{
 		size_t pre = 0, pos = 0, i;
 		bool do_break = false;
@@ -150,13 +146,10 @@ namespace detail {
 		return str.substr(pre, pos - pre);
 	}
 	//区切り文字1文字, has chain funcの時
-	template<
-		typename CharType, typename DelimType, typename FuncType,
-		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, true, false, false>
-	>
-	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<DelimType, FuncType, true, false, false>& info)
+	template<typename CharType, typename FuncType>
+	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			is_same<CharType, typename SplitHelperConvFunc::char_type>::value && SplitHelperConvFunc::result_is_void,
+			split_helper_conv_func<CharType, FuncType, true, false, false>::result_is_void,
 			void
 		>
 	{
@@ -168,12 +161,12 @@ namespace detail {
 	}
 	//区切り文字1文字, has chain convert funcの時
 	template<
-		typename CharType, typename DelimType, typename FuncType, 
-		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, true, false, false>
+		typename CharType, typename FuncType, 
+		typename SplitHelperConvFunc = split_helper_conv_func<CharType, FuncType, true, false, false>
 	>
-	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<DelimType, FuncType, true, false, false>& info)
+	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			is_same<CharType, typename SplitHelperConvFunc::char_type>::value && !SplitHelperConvFunc::result_is_void,
+			!SplitHelperConvFunc::result_is_void,
 			vector<typename SplitHelperConvFunc::result_type>
 		>
 	{
@@ -187,12 +180,8 @@ namespace detail {
 		return re;
 	}
 	//区切り文字1文字の時
-	template<typename CharType, typename DelimType>
-	auto operator| (const b_str<CharType>& str, const split_helper<DelimType, true, false, false>& info)
-		-> enable_if_t<
-			is_same<CharType, typename split_helper<DelimType, true, false, false>::char_type>::value,
-			vector<b_str<CharType>>
-		>
+	template<typename CharType>
+	vector<b_str<CharType>> operator| (const b_str<CharType>& str, const split_helper<CharType, true, false, false>& info)
 	{
 		vector<b_str<CharType>> re;
 		size_t current = 0;
@@ -272,13 +261,10 @@ namespace detail {
 		return re;
 	}
 	//区切り文字1文字, has chain funcの時
-	template<
-		typename CharType, typename DelimType, typename FuncType,
-		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, true, false, false>
-	>
-	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, true, false, false>& info)
+	template<typename CharType, typename FuncType>
+	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			is_same<CharType, typename SplitHelperConvFunc::char_type>::value && SplitHelperConvFunc::result_is_void,
+			split_helper_conv_func<CharType, FuncType, true, false, false>::result_is_void,
 			void
 		>
 	{
@@ -291,12 +277,12 @@ namespace detail {
 	}
 	//区切り文字1文字, has chain convert funcの時
 	template<
-		typename CharType, typename DelimType, typename FuncType, 
-		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, true, false, false>
+		typename CharType, typename FuncType, 
+		typename SplitHelperConvFunc = split_helper_conv_func<CharType, FuncType, true, false, false>
 	>
-	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, true, false, false>& info)
+	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			is_same<CharType, typename SplitHelperConvFunc::char_type>::value && !SplitHelperConvFunc::result_is_void,
+			!SplitHelperConvFunc::result_is_void,
 			vector<typename SplitHelperConvFunc::result_type>
 		>
 	{
@@ -311,12 +297,8 @@ namespace detail {
 		return re;
 	}
 	//区切り文字1文字の時
-	template<typename CharType, typename DelimType>
-	auto operator| (b_str<CharType>&& str, const split_helper<DelimType, true, false, false>& info)
-		-> enable_if_t<
-			is_same<CharType, typename split_helper<DelimType, true, false, false>::char_type>::value,
-			vector<b_str<CharType>>
-		>
+	template<typename CharType>
+	vector<b_str<CharType>> operator| (b_str<CharType>&& str, const split_helper<CharType, true, false, false>& info)
 	{
 		vector<b_str<CharType>> re;
 		size_t current = 0;
