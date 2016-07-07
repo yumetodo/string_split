@@ -3,6 +3,18 @@
 #include <type_traits>
 #include <limits>
 #include <stdexcept>
+//Windows.hなどからくる min max マクロがdefineされるのを防ぐ
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
 namespace detail {
 	using std::vector;
 	template<typename CharType> using b_str = std::basic_string<CharType>;
@@ -124,7 +136,7 @@ namespace detail {
 			if (b_str<CharType>::npos == pos) do_break = true;
 			++pos;
 		}
-		if(i == info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
+		if(i <= info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
 		return str.substr(pre, pos - pre - 1);
 	}
 	//区切り文字複数, operator[]の時
@@ -142,7 +154,7 @@ namespace detail {
 			pos = str.find_first_of(info.delim, pos);
 			if (b_str<CharType>::npos == pos) do_break = true;
 		}
-		if (i == info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
+		if (i <= info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
 		return str.substr(pre, pos - pre);
 	}
 	//区切り文字1文字, has chain funcの時
