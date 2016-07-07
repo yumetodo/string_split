@@ -99,8 +99,8 @@ IUTEST_TEST(SplitBySingeCharTest, type_char) {
 	IUTEST_ASSERT_TRUE(std::equal(re1_1.begin(), re1_1.end(), re1_2.begin(), re1_2.end()));
 	const std::string s2 = "ありきたりな 世界";
 	const std::vector<std::string> re2_1 = { "ありきたりな", "世界" };
-	const auto re2_2 = s1 | split(' ');
-	IUTEST_ASSERT_TRUE(std::equal(re1_1.begin(), re1_1.end(), re1_2.begin(), re1_2.end()));
+	const auto re2_2 = s2 | split(' ');
+	IUTEST_ASSERT_TRUE(std::equal(re2_1.begin(), re2_1.end(), re2_2.begin(), re2_2.end()));
 }
 IUTEST_TEST(SplitBySingeCharTest, type_wchar_t) {
 	const std::wstring s1 = L"arikitari na world!";
@@ -109,8 +109,8 @@ IUTEST_TEST(SplitBySingeCharTest, type_wchar_t) {
 	IUTEST_ASSERT_TRUE(std::equal(re1_1.begin(), re1_1.end(), re1_2.begin(), re1_2.end()));
 	const std::wstring s2 = L"ありきたりな 世界";
 	const std::vector<std::wstring> re2_1 = { L"ありきたりな", L"世界" };
-	const auto re2_2 = s1 | split(L' ');
-	IUTEST_ASSERT_TRUE(std::equal(re1_1.begin(), re1_1.end(), re1_2.begin(), re1_2.end()));
+	const auto re2_2 = s2 | split(L' ');
+	IUTEST_ASSERT_TRUE(std::equal(re2_1.begin(), re2_1.end(), re2_2.begin(), re2_2.end()));
 }
 IUTEST_TEST(SplitBySingeCharTest, type_char16_t) {
 	const std::u16string s1 = u"arikitari na world!";
@@ -119,8 +119,8 @@ IUTEST_TEST(SplitBySingeCharTest, type_char16_t) {
 	IUTEST_ASSERT_TRUE(std::equal(re1_1.begin(), re1_1.end(), re1_2.begin(), re1_2.end()));
 	const std::u16string s2 = u"ありきたりな 世界";
 	const std::vector<std::u16string> re2_1 = { u"ありきたりな", u"世界" };
-	const auto re2_2 = s1 | split(u' ');
-	IUTEST_ASSERT_TRUE(std::equal(re1_1.begin(), re1_1.end(), re1_2.begin(), re1_2.end()));
+	const auto re2_2 = s2 | split(u' ');
+	IUTEST_ASSERT_TRUE(std::equal(re2_1.begin(), re2_1.end(), re2_2.begin(), re2_2.end()));
 }
 IUTEST_TEST(SplitBySingeCharTest, type_char32_t) {
 	const std::u32string s1 = U"arikitari na world!";
@@ -129,8 +129,8 @@ IUTEST_TEST(SplitBySingeCharTest, type_char32_t) {
 	IUTEST_ASSERT_TRUE(std::equal(re1_1.begin(), re1_1.end(), re1_2.begin(), re1_2.end()));
 	const std::u32string s2 = U"ありきたりな 世界";
 	const std::vector<std::u32string> re2_1 = { U"ありきたりな", U"世界" };
-	const auto re2_2 = s1 | split(U' ');
-	IUTEST_ASSERT_TRUE(std::equal(re1_1.begin(), re1_1.end(), re1_2.begin(), re1_2.end()));
+	const auto re2_2 = s2 | split(U' ');
+	IUTEST_ASSERT_TRUE(std::equal(re2_1.begin(), re2_1.end(), re2_2.begin(), re2_2.end()));
 }
 IUTEST_TEST(SplitCovertToIntBySingeCharTest, type_char) {
 	const std::string s = "123,421,113";
