@@ -1,9 +1,7 @@
-﻿#ifdef __WANDBOX__
-#include "string_split.hpp"
-#else
-#include "../include/string_split.hpp"
-#endif
+﻿#include "../include/string_split.hpp"
 #include "../iutest/include/iutest.hpp"
+#include "../test.hpp"
+#include "test.hpp"
 #include <iostream>
 #include <array>
 #include <algorithm>
@@ -151,6 +149,8 @@ IUTEST_TEST(SplitCovertToIntBySingeCharTest, type_wchar_t) {
 
 int main(int argc, char** argv)
 {
+	f0();
+	f1();
 	IUTEST_INIT(&argc, argv);
 	return IUTEST_RUN_ALL_TESTS();
 }
