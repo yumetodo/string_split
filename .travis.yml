@@ -15,7 +15,7 @@ addons:
       - gcc-5
 before_install: git submodule update --init
 install:
-  - export PLATFORM=$(shell uname)
+  - export PLATFORM=$(uname -s)
   - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.7"; fi
 language: cpp
