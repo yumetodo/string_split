@@ -4,11 +4,7 @@
   Distributed under the Boost Software License, Version 1.0.
   (See http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
-#ifdef __WANDBOX__
-#include "string_split.hpp"
-#else
 #include "../include/string_split.hpp"
-#endif
 #include "../iutest/include/iutest.hpp"
 #include <iostream>
 #include <array>
