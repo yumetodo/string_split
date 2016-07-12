@@ -15,9 +15,10 @@ addons:
       - gcc-5
 before_install: git submodule update --init
 install:
+  - export PLATFORM=$(uname -s)
   - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.7"; fi
 language: cpp
 script:
 #  - chmod a+x ./test.sh
-  - make Debug CXX="${CXX}" && make install CXX="${CXX}" && ./test/bin/"${CXX}"/test.out && ./sample/bin/"${CXX}"/sample.out
+  - make Debug CXX="${CXX}" && make Release CXX="${CXX}" && ./test/bin/"${CXX}"/"${PLATFORM}"/Debug/test.out  && ./test/bin/"${CXX}"/"${PLATFORM}"/Release/test.out && ./sample/bin/"${CXX}"/"${PLATFORM}"/Debug/sample.out && ./sample/bin/"${CXX}"/"${PLATFORM}"/Release/sample.out

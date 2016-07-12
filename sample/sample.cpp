@@ -1,4 +1,10 @@
-﻿#include "../include/string_split.hpp"
+﻿/*=============================================================================
+  Copyright (C) 2016 yumetodo
+
+  Distributed under the Boost Software License, Version 1.0.
+  (See http://www.boost.org/LICENSE_1_0.txt)
+=============================================================================*/
+#include "../include/string_split.hpp"
 #include <iostream>
 int to_int(const std::string& s) { return std::stoi(s); }
 int main()

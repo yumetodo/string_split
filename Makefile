@@ -10,7 +10,3 @@ Release:
 clean:
 	cd test; make clean
 	cd sample; make clean
-.PHONY: install
-install:
-	cd test; make install
-	cd sample; make install
