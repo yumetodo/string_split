@@ -231,9 +231,6 @@
   <ItemGroup>
     <ClCompile Include="sample.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\string_split.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
