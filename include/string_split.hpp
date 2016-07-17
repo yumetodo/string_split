@@ -126,9 +126,9 @@ namespace detail {
 	struct split_helper<StlString, false, false, true> {
 		using char_type = typename StlString::value_type;
 		b_str<char_type> delim;
-		constexpr split_helper_index<StlString, false, true, false> operator[](size_t n) const noexcept { return{ std::move(delim), n }; }
+		split_helper_index<StlString, false, true, false> operator[](size_t n) const noexcept { return{ std::move(delim), n }; }
 		template<typename FuncType>
-		constexpr split_helper_conv_func<StlString, FuncType, false, true, false> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
+		split_helper_conv_func<StlString, FuncType, false, true, false> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
 	};
 	//区切り文字1文字, operator[]の時
 	template<typename CharType>
@@ -401,8 +401,8 @@ namespace detail {
 	}
 }
 template<typename CharType, typename std::enable_if<detail::type_traits::is_char_type<CharType>::value, std::nullptr_t>::type = nullptr>
-detail::split_helper<CharType, true, false, false> split(CharType delim) noexcept { return{ delim }; }
+constexpr detail::split_helper<CharType, true, false, false> split(CharType delim) noexcept { return{ delim }; }
 template<typename CStr, typename std::enable_if<detail::type_traits::is_c_str<CStr>::value, std::nullptr_t>::type = nullptr>
-detail::split_helper<CStr, false, true, false> split(CStr delim) noexcept { return{ delim }; }
+constexpr detail::split_helper<CStr, false, true, false> split(CStr delim) noexcept { return{ delim }; }
 template<typename StlString, typename std::enable_if<detail::type_traits::is_stl_string<StlString>::value, std::nullptr_t>::type = nullptr>
 detail::split_helper<StlString, false, false, true> split(StlString delim) noexcept { return{ std::move(delim) }; }
