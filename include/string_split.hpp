@@ -225,8 +225,8 @@ namespace detail {
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
-			current != b_str<CharType>::npos;
-			current = str.find_first_not_of(str[found], found + 1), found = str.find_first_of(info.delim, current)
+			current != b_str<CharType>::npos && found != b_str<CharType>::npos;
+			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
 			info.f(std::basic_string<CharType>(str, current, found - current));
 		}
@@ -248,8 +248,8 @@ namespace detail {
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
-			current != b_str<CharType>::npos;
-			current = str.find_first_not_of(str[found], found + 1), found = str.find_first_of(info.delim, current)
+			current != b_str<CharType>::npos && found != b_str<CharType>::npos;
+			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
 			re.push_back(info.f(std::basic_string<CharType>(str, current, found - current)));
@@ -269,8 +269,8 @@ namespace detail {
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current); 
-			current != b_str<CharType>::npos;
-			current = str.find_first_not_of(str[found], found + 1), found = str.find_first_of(info.delim, current)
+			current != b_str<CharType>::npos && found != b_str<CharType>::npos;
+			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
 			re.emplace_back(str, current, found - current);
@@ -343,8 +343,8 @@ namespace detail {
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
-			current != b_str<CharType>::npos;
-			current = str.find_first_not_of(str[found], found + 1), found = str.find_first_of(info.delim, current)
+			current != b_str<CharType>::npos && found != b_str<CharType>::npos;
+			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
 			info.f(std::basic_string<CharType>(str, current, found - current));
 		}
@@ -367,8 +367,8 @@ namespace detail {
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
-			current != b_str<CharType>::npos;
-			current = str.find_first_not_of(str[found], found + 1), found = str.find_first_of(info.delim, current)
+			current != b_str<CharType>::npos && found != b_str<CharType>::npos;
+			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
 			re.push_back(info.f(std::basic_string<CharType>(str, current, found - current)));
@@ -389,8 +389,8 @@ namespace detail {
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
-			found != b_str<CharType>::npos;
-			current = str.find_first_not_of(str[found], found + 1), found = str.find_first_of(info.delim, current)
+			current != b_str<CharType>::npos && found != b_str<CharType>::npos;
+			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
 			re.emplace_back(str, current, found - current);
