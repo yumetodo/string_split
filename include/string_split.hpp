@@ -126,9 +126,9 @@ namespace detail {
 	struct split_helper<StlString, false, false, true> {
 		using char_type = typename StlString::value_type;
 		b_str<char_type> delim;
-		split_helper_index<StlString, false, true, false> operator[](size_t n) const noexcept { return{ std::move(delim), n }; }
+		split_helper_index<StlString, false, false, true> operator[](size_t n) const noexcept { return{ std::move(delim), n }; }
 		template<typename FuncType>
-		split_helper_conv_func<StlString, FuncType, false, true, false> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
+		split_helper_conv_func<StlString, FuncType, false, false, true> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
 	};
 	//区切り文字1文字, operator[]の時
 	template<typename CharType>
