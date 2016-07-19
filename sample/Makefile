@@ -4,9 +4,9 @@ TARGET 	= sample.out
 SRCS 	= ./sample.cpp
 
 # 基本コマンド
-RM 		:= rm
-CXX 	:= g++
-CC 		:= gcc
+RM 		?= rm
+CXX 	?= g++
+CC 		?= gcc
 
 # デバッグ時とリリース時の微調整
 CXX_DEBUG_FLAGS		=	-g -O0 -Wall -Wextra

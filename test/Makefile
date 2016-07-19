@@ -4,10 +4,10 @@ TARGET 	= test.out
 SRCS 	= ./test.cpp
 
 # 基本コマンド
-RM 		:= rm
-CXX 	:= g++
-CC 		:= gcc
-CCOV    := gcov
+RM 		?= rm
+CXX 	?= g++
+CC		?= gcc
+CCOV 	?= gcov
 
 # デバッグ時とリリース時の微調整
 CXX_DEBUG_FLAGS		=	-g -O0 -Wall -Wextra
