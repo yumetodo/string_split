@@ -21,11 +21,14 @@ endif
 
 CONFIGURATION = unknown
 PLATFORM = $(shell uname)
-
+COVERAGE_OPTION := -coverage
 # make
 # debug
 .PHONY: Debug
 Debug: CXXFLAGS+=$(CXX_DEBUG_FLAGS)
+ifdef USE_COVERAGE
+Debug: CXXFLAGS+=$(COVERAGE_OPTION)
+endif
 Debug: CONFIGURATION=Debug
 Debug: all
 # release
@@ -38,11 +41,6 @@ Release: all
 all: $(TARGET)
 $(TARGET): $(SRCS)
 	$(CXX) --version;
-ifeq ($(CONFIGURATION), Debug)
-ifdef USE_COVERAGE
-	CXXFLAGS += -coverage;
-endif
-endif
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(CPPFLAGS)
 	mkdir -p bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION) && cp $(TARGET) bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION)/$(TARGET)
 
