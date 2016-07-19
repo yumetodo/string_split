@@ -27,6 +27,7 @@ install:
     fi
 language: cpp
 script:
+  - $($CXX) -v
   - make Release USE_COVERAGE=0 && ./test/test.out && ./sample/sample.out && make clean && make Debug && ./test/test.out && ./sample/sample.out
 after_success:
   # Coverage
