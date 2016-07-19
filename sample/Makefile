@@ -32,6 +32,7 @@ Release: all
 .PHONY: all
 all: $(TARGET)
 $(TARGET): $(SRCS)
+	$(CXX) --version
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(CPPFLAGS)
 	mkdir -p bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION) && mv $(TARGET) bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION)/$(TARGET)
 

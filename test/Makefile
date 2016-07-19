@@ -39,6 +39,7 @@ Release: all
 
 all: $(TARGET)
 $(TARGET): $(SRCS)
+	$(CXX) --version
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(CPPFLAGS)
 	mkdir -p bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION) && cp $(TARGET) bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION)/$(TARGET)
 
@@ -52,6 +53,7 @@ clean:
 coverage:
 	$(CCOV) -v
 ifeq ($(USE_COVERAGE),lcov)
+	lcov --version
 	lcov -c -d . --gcov-tool "$(shell which $(CCOV))" -o coverage.info && lcov -r coverage.info *gcc* -o coverage.info && lcov -r coverage.info *iutest* -o coverage.info && lcov -r coverage.info *mingw* -o coverage.info;
 endif
 ifeq ($(USE_COVERAGE),gcov)
