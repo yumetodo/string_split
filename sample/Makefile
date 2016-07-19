@@ -34,7 +34,7 @@ all: $(TARGET)
 $(TARGET): $(SRCS)
 	$(CXX) --version
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(CPPFLAGS)
-	mkdir -p bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION) && mv $(TARGET) bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION)/$(TARGET)
+	mkdir -p bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION) && cp $(TARGET) bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION)/$(TARGET)
 
 # make clean
 .PHONY: clean
