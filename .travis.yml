@@ -10,15 +10,24 @@ addons:
       - llvm-toolchain-precise-3.8
       - llvm-toolchain-precise
     packages:
+      - lcov
+      - rubygems
       - clang-3.8
       - g++-5
       - gcc-5
 before_install: git submodule update --init
 install:
   - export PLATFORM=$(uname -s)
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
-  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.7"; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5" CCOV="gcov-5" USE_COVERAGE="lcov" USE_COVERALLS=1; fi
+  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.8"; fi
+  - |
+    if [ "${USE_COVERALLS}" = '1' ]; then
+      if [ "${USE_COVERAGE}" = 'gcov' ]; then easy_install cpp-coveralls; fi
+      if [ "${USE_COVERAGE}" = 'lcov' ]; then gem install lcoveralls; fi
+    fi
 language: cpp
 script:
-#  - chmod a+x ./test.sh
-  - make Debug CXX="${CXX}" && make Release CXX="${CXX}" && ./test/bin/"${CXX}"/"${PLATFORM}"/Debug/test.out  && ./test/bin/"${CXX}"/"${PLATFORM}"/Release/test.out && ./sample/bin/"${CXX}"/"${PLATFORM}"/Debug/sample.out && ./sample/bin/"${CXX}"/"${PLATFORM}"/Release/sample.out
+  - make Release USE_COVERAGE=0 && ./test/test.out && ./sample/sample.out && make clean && make Debug && ./test/test.out && ./sample/sample.out
+after_success:
+  # Coverage
+  - if [ "${USE_COVERALLS}" = '1' ]; then cd ./test; make send-coveralls; fi

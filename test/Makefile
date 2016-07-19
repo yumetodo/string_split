@@ -7,6 +7,7 @@ SRCS 	= ./test.cpp
 RM 		:= rm
 CXX 	:= g++
 CC 		:= gcc
+CCOV    := gcov
 
 # デバッグ時とリリース時の微調整
 CXX_DEBUG_FLAGS		=	-g -O0 -Wall -Wextra
@@ -17,6 +18,10 @@ CPPFLAGS = -std=c++14
 ifeq ($(OS),Windows_NT)
 CPPFLAGS += -lWs2_32
 endif
+ifdef USE_COVERAGE
+CXXFLAGS += -coverage
+endif
+
 CONFIGURATION = unknown
 PLATFORM = $(shell uname)
 
@@ -35,9 +40,34 @@ Release: all
 all: $(TARGET)
 $(TARGET): $(SRCS)
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(CPPFLAGS)
-	mkdir -p bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION) && mv $(TARGET) bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION)/$(TARGET)
+	mkdir -p bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION) && cp $(TARGET) bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION)/$(TARGET)
 
 # make clean
 .PHONY: clean
 clean:
 	$(RM) -f *.out
+
+# coverage
+.PHONY: coverage
+coverage:
+	$(CCOV) -v
+ifeq ($(USE_COVERAGE),lcov)
+	lcov -c -d . --gcov-tool "$(shell which $(CCOV))" -o coverage.info && lcov -r coverage.info *gcc* -o coverage.info && lcov -r coverage.info *iutest* -o coverage.info && lcov -r coverage.info *mingw* -o coverage.info;
+endif
+ifeq ($(USE_COVERAGE),gcov)
+ifeq ($(findstring relative-only, $(shell $(CCOV) --help)), relative-only)
+	gcov -r *.gcda;
+else
+	gcov *.gcda;
+endif
+endif
+
+# send-coveralls
+.PHONY: send-coveralls
+send-coveralls: coverage
+ifeq ($(USE_COVERAGE),lcov)
+	lcoveralls --retry-count 3 ./coverage.info
+endif
+ifeq ($(USE_COVERAGE),gcov)
+	coveralls -n -r ./ -b ./ $(COVARALLS_EXCLUDE_PATTERN) $(COVARALLS_EXCLUDE)
+endif

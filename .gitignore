@@ -244,6 +244,11 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 
+# gcov/lcov
+coverage.info
+*.gcda
+*.gcno
+
 # Other
 *.dump
 *.out

@@ -1,6 +1,8 @@
 # string split like chain method
 [![Run Status](https://api.shippable.com/projects/577cc6213be4f4faa56be97c/badge?branch=master)](https://app.shippable.com/projects/577cc6213be4f4faa56be97c)
 [![Build Status](https://travis-ci.org/yumetodo/string_split.svg?branch=master)](https://travis-ci.org/yumetodo/string_split)
+[![Coverage Status](https://coveralls.io/repos/github/yumetodo/string_split/badge.svg?branch=master)](https://coveralls.io/github/yumetodo/string_split?branch=master)
+[![Boost Software License](https://img.shields.io/badge/license-boost-blue.svg)](http://www.boost.org/LICENSE_1_0.txt)
 
 This is a **C++ header only** library to split string.
 
