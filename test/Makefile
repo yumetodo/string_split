@@ -18,9 +18,6 @@ CPPFLAGS = -std=c++14
 ifeq ($(OS),Windows_NT)
 CPPFLAGS += -lWs2_32
 endif
-ifdef USE_COVERAGE
-CXXFLAGS += -coverage
-endif
 
 CONFIGURATION = unknown
 PLATFORM = $(shell uname)
@@ -37,9 +34,15 @@ Release: CXXFLAGS+=$(CXX_RELEASE_FLAGS)
 Release: CONFIGURATION=Release
 Release: all
 
+.PHONY: all
 all: $(TARGET)
 $(TARGET): $(SRCS)
-	$(CXX) --version
+	$(CXX) --version;
+ifeq ($(CONFIGURATION), Debug)
+ifdef USE_COVERAGE
+	CXXFLAGS += -coverage;
+endif
+endif
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(CPPFLAGS)
 	mkdir -p bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION) && cp $(TARGET) bin/$(CXX)/$(PLATFORM)/$(CONFIGURATION)/$(TARGET)
 
