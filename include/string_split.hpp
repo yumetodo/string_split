@@ -135,14 +135,13 @@ namespace detail {
 	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_index<CharType, true, false, false>& info)
 	{
 		size_t pre = 0, pos = 0, i;
-		bool do_break = false;
-		for (i = 0; i < info.index + 1 && !do_break; ++i) {
+		for (i = 0; i < info.index + 1; ++i) {
 			pre = pos;
 			pos = str.find_first_of(info.delim, pos);
-			if (b_str<CharType>::npos == pos) do_break = true;
+			if (b_str<CharType>::npos == pos) break;
 			++pos;
 		}
-		if(i <= info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
+		if(i < info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
 		return str.substr(pre, pos - pre - 1);
 	}
 	//区切り文字複数, operator[]の時
@@ -154,13 +153,12 @@ namespace detail {
 		>
 	{
 		size_t pre = 0, pos = 0, i;
-		bool do_break = false;
-		for (i = 0; i < info.index + 1 && !do_break; ++i) {
+		for (i = 0; i < info.index + 1; ++i) {
 			if(pos) pre = pos = str.find_first_not_of(info.delim, pos);
 			pos = str.find_first_of(info.delim, pos);
-			if (b_str<CharType>::npos == pos) do_break = true;
+			if (b_str<CharType>::npos == pos) break;
 		}
-		if (i <= info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
+		if (i < info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
 		return str.substr(pre, pos - pre);
 	}
 	//区切り文字1文字, has chain funcの時
@@ -277,6 +275,42 @@ namespace detail {
 		}
 		re.emplace_back(str, current, str.size() - current);
 		return re;
+	}
+	//区切り文字1文字, operator[]の時
+	template<typename CharType>
+	b_str<CharType> operator| (b_str<CharType>&& str, const split_helper_index<CharType, true, false, false>& info)
+	{
+		size_t pre = 0, pos = 0, i;
+		for (i = 0; i < info.index + 1; ++i) {
+			pre = pos;
+			pos = str.find_first_of(info.delim, pos);
+			if (b_str<CharType>::npos == pos) break;
+			++pos;
+		}
+		if (i < info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
+		--pos;
+		if(pos <= str.size()) str.erase(pos);
+		str.erase(0, pre);
+		return str;
+	}
+	//区切り文字複数, operator[]の時
+	template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
+	auto operator| (b_str<CharType>&& str, const split_helper_index<DelimType, false, is_c_str, is_stl_string>& info)
+		-> enable_if_t<
+		(is_c_str || is_stl_string) && is_same<CharType, typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type>::value,
+		b_str<CharType>
+		>
+	{
+		size_t pre = 0, pos = 0, i;
+		for (i = 0; i < info.index + 1; ++i) {
+			if (pos) pre = pos = str.find_first_not_of(info.delim, pos);
+			pos = str.find_first_of(info.delim, pos);
+			if (b_str<CharType>::npos == pos) break;
+		}
+		if (i < info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
+		if (pos <= str.size()) str.erase(pos);
+		str.erase(0, pre);
+		return str;
 	}
 	//区切り文字1文字, has chain funcの時
 	template<typename CharType, typename FuncType>
