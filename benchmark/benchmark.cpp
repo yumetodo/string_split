@@ -4,6 +4,13 @@
 #include <iostream>
 #include <sstream>
 #include <chrono>
+
+/******************* global variable *****************************
+******************************************************************/
+static std::mt19937 rnd = make_random_generator();
+
+
+
 //http://qiita.com/iseki-masaya/items/70b4ee6e0877d12dafa8
 //copyright : iseki-masaya
 std::vector<std::string> split_sstream(const std::string &s, char delim) {
@@ -75,15 +82,37 @@ std::vector<std::string> split_our_library(const std::string &str, char delim) {
 	return str | split(delim);
 }
 using split_func_t = std::vector<std::string>(*)(const std::string&, char);
-static auto rnd = make_random_generator();
+std::vector<std::size_t> generate_random_string_impl_make_delim_pos_v(std::size_t len, std::size_t split_num) {
+	std::vector<std::size_t> delem_pos(static_cast<std::size_t>(split_num * 1.3));
+	std::uniform_int_distribution<std::size_t> dist(0, len);
+	auto generator = [&dist]() {
+		return dist(rnd);
+	};
+	auto is_serial_and_replace = [&dist](std::vector<std::size_t>& v) {
+		bool re = false;
+		for (auto it1 = v.begin(), it2 = it1 + 1; v.end() != it2; it1 = it2, ++it2) {
+			if (*it1 + 1 == *it2) {
+				*it2 = dist(rnd);
+				re = true;
+			}
+		}
+		return re;
+	};
+	std::generate(delem_pos.begin(), delem_pos.end(), generator);
+	std::vector<std::size_t>::iterator unique_end;
+	do {
+		std::sort(delem_pos.begin(), delem_pos.end());
+		unique_end = std::unique(delem_pos.begin(), delem_pos.end());
+		if (delem_pos.begin() + split_num < unique_end) {
+			std::generate(unique_end, delem_pos.end(), generator);
+		}
+	} while (is_serial_and_replace(delem_pos));
+	delem_pos.erase(std::min(unique_end, delem_pos.begin() +  split_num), delem_pos.end());
+	return delem_pos;
+}
 std::string generate_random_string(std::size_t len, std::size_t split_num, char delim) {
 	static const char pool[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	std::vector<std::size_t> delem_pos(split_num);
-	std::generate(delem_pos.begin(), delem_pos.end(), [len]() {
-		static std::uniform_int_distribution<std::size_t> dist(0, len);
-		return dist(rnd);
-	});
-	std::sort(delem_pos.begin(), delem_pos.end());
+	const auto delem_pos = generate_random_string_impl_make_delim_pos_v(len, split_num);
 	std::string re(len, ' ');
 	for (auto&& p : delem_pos) re[p] = delim;
 	static std::uniform_int_distribution<std::size_t> dist(0, sizeof(pool) / sizeof(*pool));
