@@ -10,7 +10,6 @@
 static std::mt19937 rnd = make_random_generator();
 
 
-
 //http://qiita.com/iseki-masaya/items/70b4ee6e0877d12dafa8
 //copyright : iseki-masaya
 std::vector<std::string> split_sstream(const std::string &s, char delim) {
@@ -53,7 +52,7 @@ std::vector<std::string> split_find(const std::string &s, char delim) {
 	while (true) {
 		ss_point = str.find(delim);
 		// 部分文字列が見つからなかった場合
-		if (ss_point == -1) {
+		if (ss_point == std::string::npos) {
 			break;
 		}
 		// 部分文字列が見つかった場合
@@ -122,7 +121,7 @@ std::string generate_random_string(std::size_t len, std::size_t split_num, char 
 void benchmark_split_only(split_func_t split_f, const char* func_name, const std::string& s, char delim, std::size_t cnt) {
 	namespace ch = std::chrono;
 	const auto t_start = ch::high_resolution_clock::now();
-	for (auto&& i : rep(cnt - 1)) {
+	for ([[gnu::unused]] auto&& i : rep(cnt - 1)) {
 		split_f(s, delim);
 	}
 	const auto re = split_f(s, delim);
@@ -146,13 +145,13 @@ void benchmark_split_extract(split_func_t split_f, const char* func_name, const 
 	const auto t_start = ch::high_resolution_clock::now();
 	std::string re;
 	if (split_our_library == split_f) {
-		for (auto&& i : rep(cnt - 1)) {
+		for ([[gnu::unused]] auto&& i : rep(cnt - 1)) {
 			s | split(delim)[extract_i];
 		}
 		re = s | split(delim)[extract_i];
 	}
 	else {
-		for (auto&& i : rep(cnt - 1)) {
+		for ([[gnu::unused]] auto&& i : rep(cnt - 1)) {
 			split_f(s, delim)[extract_i];
 		}
 		re = split_f(s, delim)[extract_i];

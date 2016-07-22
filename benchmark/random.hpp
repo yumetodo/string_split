@@ -24,6 +24,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <cstdint>
 #include <chrono>
 #include <type_traits>
+#include <climits>
 namespace detail {
 	template<typename T>
 	struct vector_push_back_helper {
