@@ -10,7 +10,7 @@ addons:
       - llvm-toolchain-precise-3.8
       - llvm-toolchain-precise
     packages:
-      - lcov
+      #- lcov
       - rubygems
       - clang-3.8
       - g++-5
@@ -23,7 +23,15 @@ install:
   - |
     if [ "${USE_COVERALLS}" = '1' ]; then
       if [ "${USE_COVERAGE}" = 'gcov' ]; then easy_install cpp-coveralls; fi
-      if [ "${USE_COVERAGE}" = 'lcov' ]; then gem install lcoveralls; fi
+      if [ "${USE_COVERAGE}" = 'lcov' ]; then 
+        pwd
+        git clone https://github.com/linux-test-project/lcov.git ./lcov
+        cd lcov
+        make install
+        cd ..
+        pwd
+        gem install lcoveralls; 
+      fi
     fi
 language: cpp
 script:
