@@ -3,6 +3,7 @@ compiler:
   - gcc
 cache:
   apt: true
+sudo: required
 addons:
   apt:
     sources:
@@ -27,7 +28,7 @@ install:
         pwd
         git clone https://github.com/linux-test-project/lcov.git ./lcov
         cd lcov
-        make install
+        sudo make install
         cd ..
         pwd
         gem install lcoveralls; 
