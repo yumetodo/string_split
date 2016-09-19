@@ -69,7 +69,9 @@ endif
 .PHONY: send-coveralls
 send-coveralls: coverage
 ifeq ($(USE_COVERAGE),lcov)
-	lcoveralls --retry-count 3 ./coverage.info
+	pwd
+	cd ..
+	lcoveralls --retry-count 3 ./test/coverage.info
 endif
 ifeq ($(USE_COVERAGE),gcov)
 	coveralls -n -r ./ -b ./ $(COVARALLS_EXCLUDE_PATTERN) $(COVARALLS_EXCLUDE)
