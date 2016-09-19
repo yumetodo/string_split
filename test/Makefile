@@ -68,7 +68,7 @@ endif
 # send-coveralls
 .PHONY: send-coveralls
 send-coveralls: coverage
-pwd
+pwd;
 ifeq ($(USE_COVERAGE),lcov)
 	cd ../; lcoveralls --retry-count 3 ./test/coverage.info
 endif
