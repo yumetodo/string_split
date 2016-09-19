@@ -55,7 +55,7 @@ coverage:
 	$(CCOV) -v
 ifeq ($(USE_COVERAGE),lcov)
 	lcov --version
-	lcov -c -d . --gcov-tool "$(shell which $(CCOV))" -o coverage.info && lcov -r coverage.info *gcc* -o coverage.info && lcov -r coverage.info *iutest* -o coverage.info && lcov -r coverage.info *mingw* -o coverage.info;
+	lcov -c -d . --gcov-tool "$(shell which $(CCOV))" -o coverage.info && lcov -r coverage.info *gcc* -o coverage.info && lcov -r coverage.info *iutest* -o coverage.info && lcov -r coverage.info */usr/include/* -o coverage.info && lcov -r coverage.info *mingw* -o coverage.info;
 endif
 ifeq ($(USE_COVERAGE),gcov)
 ifeq ($(findstring relative-only, $(shell $(CCOV) --help)), relative-only)
@@ -68,8 +68,9 @@ endif
 # send-coveralls
 .PHONY: send-coveralls
 send-coveralls: coverage
+	pwd
 ifeq ($(USE_COVERAGE),lcov)
-	lcoveralls --retry-count 3 ./coverage.info
+	cd ../; lcoveralls --retry-count 3 ./test/coverage.info
 endif
 ifeq ($(USE_COVERAGE),gcov)
 	coveralls -n -r ./ -b ./ $(COVARALLS_EXCLUDE_PATTERN) $(COVARALLS_EXCLUDE)

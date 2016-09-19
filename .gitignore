@@ -248,6 +248,17 @@ ModelManifest.xml
 coverage.info
 *.gcda
 *.gcno
+test/*.png
+test/*.html
+test/*.css
+test/bin/
+test/home/
+test/include/
+test/test
+test/5/
+
+# Visual Studio Code
+.vscode/
 
 # Other
 *.dump
