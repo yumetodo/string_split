@@ -1,17 +1,17 @@
 .PHONY: Debug
 Debug:
 	$(CXX) --version
-	cd test; make Debug
-	cd sample; make Debug
-	cd benchmark; make Debug
+	cd test; $(MAKE) Debug
+	cd sample; $(MAKE) Debug
+	cd benchmark; $(MAKE) Debug
 .PHONY: Release
 Release:
 	$(CXX) --version
-	cd test; make Release
-	cd sample; make Release
-	cd benchmark; make Release
+	cd test; $(MAKE) Release
+	cd sample; $(MAKE) Release
+	cd benchmark; $(MAKE) Release
 .PHONY: clean
 clean:
-	cd test; make clean
-	cd sample; make clean
-	cd benchmark; make clean
+	cd test; $(MAKE) clean
+	cd sample; $(MAKE) clean
+	cd benchmark; $(MAKE) clean
