@@ -182,9 +182,9 @@ namespace detail {
 	template<typename CharType, typename DelimType>
 	std::array<b_str<CharType>, 2> operator| (const b_str<CharType>& str, const split_helper_split_at_last<DelimType, CharType>& info)
 	{
-		const auto pos = str.find_first_of(info.delim);
+		const auto pos = str.find_last_of(info.delim);
 		if (b_str<CharType>::npos == pos) return{ { {}, str } };
-		return { { str.substr(0, pos), str.substr(str.find_first_not_of(info.delim, pos)) } };
+		return { { str.substr(0, str.find_last_not_of(info.delim, pos) + 1), str.substr(pos + 1) } };
 	}
 	//区切り文字1文字, operator[]の時
 	template<typename CharType>
@@ -359,8 +359,8 @@ namespace detail {
 		const std::size_t pos = str.find_last_of(info.delim);
 		if (b_str<CharType>::npos == pos) return{ { {}, std::move(str) } };
 		std::array<b_str<CharType>, 2> re;
-		re[1] = str.substr(str.find_last_not_of(info.delim, pos));
-		str.erase(pos);
+		re[1] = str.substr(pos + 1);
+		str.erase(str.find_last_not_of(info.delim, pos) + 1);
 		re[0] = std::move(str);
 		return re;
 	}
