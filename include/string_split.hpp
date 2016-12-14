@@ -380,11 +380,11 @@ namespace detail {
 	}
 	//at_first().back()の時
 	template<typename CharType, typename DelimType>
-	b_str<CharType> operator| (b_str<CharType>&& str, const split_helper_subroutine<split_at_first, DelimType, CharType>& info)
+	b_str<CharType> operator| (b_str<CharType>&& str, const split_helper_subroutine<split_at_first_back, DelimType, CharType>& info)
 	{
 		const std::size_t pos = str.find_first_of(info.delim);
 		if (b_str<CharType>::npos == pos) return {};
-		str.erase(0, str.find_first_not_of(info.delim, pos) + 1);
+		str.erase(0, str.find_first_not_of(info.delim, pos));
 		return str;
 	}
 	//at_first()の時
@@ -401,11 +401,11 @@ namespace detail {
 	}
 	//at_last().front()の時
 	template<typename CharType, typename DelimType>
-	std::array<b_str<CharType>, 2> operator| (b_str<CharType>&& str, const split_helper_subroutine<split_at_last, DelimType, CharType>& info)
+	b_str<CharType> operator| (b_str<CharType>&& str, const split_helper_subroutine<split_at_last_front, DelimType, CharType>& info)
 	{
 		const std::size_t pos = str.find_last_of(info.delim);
 		if (b_str<CharType>::npos == pos) return {};
-		str.erase(0, pos + 1);
+		str.erase(str.find_last_not_of(info.delim, pos) + 1);
 		return str;
 	}
 	//at_last()の時
