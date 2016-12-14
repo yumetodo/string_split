@@ -67,6 +67,13 @@ IUTEST_TYPED_TEST(StringSplitLvalue, chain_front_by_singe_char)
 	const auto re = s | split(constant::space<char_type>()) >> front();
 	IUTEST_ASSERT_EQ(constant::cpp_basic_istream_part<char_type>(), re);
 }
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_back_by_singe_char)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world<char_type>();
+	const auto re = s | split(constant::space<char_type>()) >> back();
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), re);
+}
 IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_first_by_single_char)
 {
 	using char_type = TypeParam;
@@ -268,6 +275,13 @@ IUTEST_TYPED_TEST(StringSplitRvalue, chain_front_by_singe_char)
 	using s = std::basic_string<char_type>;
 	const auto re = s(constant::cpp_basic_istream<char_type>()) | split(constant::space<char_type>()) >> front();
 	IUTEST_ASSERT_EQ(constant::cpp_basic_istream_part<char_type>(), re);
+}
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_back_by_singe_char)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const auto re = s(constant::arikitari_na_world<char_type>()) | split(constant::space<char_type>()) >> back();
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), re);
 }
 IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_first_by_single_char)
 {
