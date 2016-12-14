@@ -146,7 +146,7 @@ namespace detail {
 		constexpr split_helper_index<CStr, false, true, false> operator[](size_t n) const noexcept { return{ delim, n }; }
 		template<typename FuncType>
 		constexpr split_helper_conv_func<CStr, FuncType, false, true, false> operator >> (FuncType&& f) const { return{ delim, std::forward<FuncType>(f) }; }
-		constexpr split_helper_index<CStr, false, true, false> operator>>(get_front) const noexcept { return{ delim }; }
+		constexpr split_helper_index<CStr, false, true, false> operator>>(get_front) const noexcept { return{ delim, 0 }; }
 		constexpr split_helper_get_back<CStr, char_type> operator>>(get_back) const noexcept { return{ delim }; }
 		constexpr split_helper_split_at_first<CStr, char_type> operator>>(split_at_first) const noexcept { return{ delim }; }
 		constexpr split_helper_split_at_last<CStr, char_type> operator>>(split_at_last) const noexcept { return{ delim }; }
@@ -158,7 +158,7 @@ namespace detail {
 		split_helper_index<StlString, false, false, true> operator[](size_t n) const noexcept { return{ std::move(delim), n }; }
 		template<typename FuncType>
 		split_helper_conv_func<StlString, FuncType, false, false, true> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
-		split_helper_index<StlString, false, false, true> operator>>(get_front) const noexcept { return{ std::move(delim) }; }
+		split_helper_index<StlString, false, false, true> operator>>(get_front) const noexcept { return{ std::move(delim), 0 }; }
 		split_helper_get_back<StlString, char_type> operator>>(get_back) const noexcept { return{ std::move(delim) }; }
 		constexpr split_helper_split_at_first<StlString, char_type> operator>>(split_at_first) const noexcept { return{ delim }; }
 		constexpr split_helper_split_at_last<StlString, char_type> operator>>(split_at_last) const noexcept { return{ delim }; }
