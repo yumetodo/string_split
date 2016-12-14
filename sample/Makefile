@@ -13,7 +13,7 @@ CXX_DEBUG_FLAGS		=	-g -O0 -Wall -Wextra
 CXX_RELEASE_FLAGS	=	-O2 -Wall -Wextra
 
 # 基本オプション
-CPPFLAGS = -std=c++11
+CPPFLAGS = -std=c++14
 CONFIGURATION = unknown
 PLATFORM = $(shell uname)
 
