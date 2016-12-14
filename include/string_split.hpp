@@ -157,10 +157,10 @@ namespace detail {
 		using char_type = CharType;
 		CharType delim;
 		constexpr split_helper_index<CharType, true, false, false> operator[](size_t n) const noexcept { return{ delim, n }; }
-		template<typename FuncType, std::enable_if_t<!is_subroutine<FuncType>::value, std::nullptr_t> = nullptr>
+		template<typename FuncType, enable_if_t<!is_subroutine<FuncType>::value, std::nullptr_t> = nullptr>
 		constexpr split_helper_conv_func<CharType, FuncType, true, false, false> operator>> (FuncType&& f) const { return{ delim, std::forward<FuncType>(f) }; }
 		constexpr split_helper_index<CharType, true, false, false> operator>>(get_front) const noexcept { return{ delim, 0 }; }
-		template<typename Subroutine, std::enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
+		template<typename Subroutine, enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
 		constexpr split_helper_subroutine<Subroutine, CharType, CharType> operator>> (Subroutine) const noexcept { return{ delim }; }
 	};
 	template<typename CStr>
@@ -168,10 +168,10 @@ namespace detail {
 		using char_type = remove_cv_t<remove_pointer_t<CStr>>;
 		const char_type* delim;
 		constexpr split_helper_index<CStr, false, true, false> operator[](size_t n) const noexcept { return{ delim, n }; }
-		template<typename FuncType, std::enable_if_t<!is_subroutine<FuncType>::value, std::nullptr_t> = nullptr>
+		template<typename FuncType, enable_if_t<!is_subroutine<FuncType>::value, std::nullptr_t> = nullptr>
 		constexpr split_helper_conv_func<CStr, FuncType, false, true, false> operator >> (FuncType&& f) const { return{ delim, std::forward<FuncType>(f) }; }
 		constexpr split_helper_index<CStr, false, true, false> operator>>(get_front) const noexcept { return{ delim, 0 }; }
-		template<typename Subroutine, std::enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
+		template<typename Subroutine, enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
 		constexpr split_helper_subroutine<Subroutine, CStr, char_type> operator>> (Subroutine) const noexcept { return{ delim }; }
 	};
 	template<typename StlString>
@@ -179,10 +179,10 @@ namespace detail {
 		using char_type = typename StlString::value_type;
 		b_str<char_type> delim;
 		split_helper_index<StlString, false, false, true> operator[](size_t n) const noexcept { return{ std::move(delim), n }; }
-		template<typename FuncType, std::enable_if_t<!is_subroutine<FuncType>::value, std::nullptr_t> = nullptr>
+		template<typename FuncType, enable_if_t<!is_subroutine<FuncType>::value, std::nullptr_t> = nullptr>
 		split_helper_conv_func<StlString, FuncType, false, false, true> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
 		split_helper_index<StlString, false, false, true> operator>>(get_front) const noexcept { return{ std::move(delim), 0 }; }
-		template<typename Subroutine, std::enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
+		template<typename Subroutine, enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
 		split_helper_subroutine<Subroutine, StlString, char_type> operator>> (Subroutine) const noexcept { return{ std::move(delim) }; }
 	};
 	//back()の時
