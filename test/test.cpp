@@ -36,6 +36,8 @@ namespace constant {
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(space_comma, ", ");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(arikitari_na_world, "arikitari na world!");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(arikitari_na_world_underscore, "arikitari na_world!");
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(arikitari_na, "arikitari na");
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(na_world, "na_world!");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(arikitari, "arikitari");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(na, "na");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(world, "world!");
@@ -67,12 +69,40 @@ IUTEST_TYPED_TEST(StringSplitLvalue, chain_front_by_singe_char)
 	const auto re = s | split(constant::space<char_type>()) >> front();
 	IUTEST_ASSERT_EQ(constant::cpp_basic_istream_part<char_type>(), re);
 }
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_front_by_c_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	constexpr auto delim = constant::space_underscore<char_type>();
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), s | split(delim) >> front());
+}
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_front_by_stl_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const std::basic_string<char_type> delim = constant::space_underscore<char_type>();
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), s | split(delim) >> front());
+}
 IUTEST_TYPED_TEST(StringSplitLvalue, chain_back_by_singe_char)
 {
 	using char_type = TypeParam;
 	const std::basic_string<char_type> s = constant::arikitari_na_world<char_type>();
 	const auto re = s | split(constant::space<char_type>()) >> back();
 	IUTEST_ASSERT_EQ(constant::world<char_type>(), re);
+}
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_back_by_c_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	constexpr auto delim = constant::space_underscore<char_type>();
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), s | split(delim) >> back());
+}
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_back_by_stl_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const std::basic_string<char_type> delim = constant::space_underscore<char_type>();
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), s | split(delim) >> back());
 }
 IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_first_by_single_char)
 {
@@ -83,6 +113,24 @@ IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_first_by_single_char)
 	IUTEST_ASSERT_EQ(constant::cpp_dxle_sound_c<char_type>(), re[0]);
 	IUTEST_ASSERT_EQ(constant::cpp_LoadSoundMem<char_type>(), re[1]);
 }
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_first_by_c_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const auto re = s | split(constant::space_underscore<char_type>()) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_first_by_stl_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const auto re = s | split(std::basic_string<char_type>(constant::space_underscore<char_type>())) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re[1]);
+}
 IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_last_by_single_char)
 {
 	using char_type = TypeParam;
@@ -91,6 +139,24 @@ IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_last_by_single_char)
 	IUTEST_ASSERT(2u == re.size());
 	IUTEST_ASSERT_EQ(constant::cpp_basic_istream<char_type>(), re[0]);
 	IUTEST_ASSERT_EQ(constant::ignore<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_last_by_c_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const auto re = s | split(constant::space_underscore<char_type>()) >> at_last();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari_na<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_last_by_stl_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const auto re = s | split(std::basic_string<char_type>(constant::space_underscore<char_type>())) >> at_last();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari_na<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), re[1]);
 }
 IUTEST_TYPED_TEST(StringSplitLvalue, ExtractBySingeChar)
 {
@@ -276,11 +342,43 @@ IUTEST_TYPED_TEST(StringSplitRvalue, chain_front_by_singe_char)
 	const auto re = s(constant::cpp_basic_istream<char_type>()) | split(constant::space<char_type>()) >> front();
 	IUTEST_ASSERT_EQ(constant::cpp_basic_istream_part<char_type>(), re);
 }
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_front_by_c_str)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	constexpr auto delim = constant::space_underscore<char_type>();
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(delim) >> front();
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re);
+}
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_front_by_stl_str)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const s delim = constant::space_underscore<char_type>();
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(delim) >> front();
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re);
+}
 IUTEST_TYPED_TEST(StringSplitRvalue, chain_back_by_singe_char)
 {
 	using char_type = TypeParam;
 	using s = std::basic_string<char_type>;
 	const auto re = s(constant::arikitari_na_world<char_type>()) | split(constant::space<char_type>()) >> back();
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), re);
+}
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_back_by_c_str)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	constexpr auto delim = constant::space_underscore<char_type>();
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(delim) >> back();
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), re);
+}
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_back_by_stl_str)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const s delim = constant::space_underscore<char_type>();
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(delim) >> back();
 	IUTEST_ASSERT_EQ(constant::world<char_type>(), re);
 }
 IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_first_by_single_char)
@@ -292,6 +390,24 @@ IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_first_by_single_char)
 	IUTEST_ASSERT_EQ(constant::cpp_dxle_sound_c<char_type>(), re[0]);
 	IUTEST_ASSERT_EQ(constant::cpp_LoadSoundMem<char_type>(), re[1]);
 }
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_first_by_c_str)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(constant::space_underscore<char_type>()) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_first_by_stl_str)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(s(constant::space_underscore<char_type>())) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re[1]);
+}
 IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_last_by_single_char)
 {
 	using char_type = TypeParam;
@@ -300,6 +416,24 @@ IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_last_by_single_char)
 	IUTEST_ASSERT(2u == re.size());
 	IUTEST_ASSERT_EQ(constant::cpp_basic_istream<char_type>(), re[0]);
 	IUTEST_ASSERT_EQ(constant::ignore<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_last_by_c_str)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(constant::space_underscore<char_type>()) >> at_last();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari_na<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_last_by_stl_str)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(s(constant::space_underscore<char_type>())) >> at_last();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari_na<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), re[1]);
 }
 IUTEST_TYPED_TEST(StringSplitRvalue, ExtractBySingeChar)
 {
