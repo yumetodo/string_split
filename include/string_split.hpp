@@ -66,17 +66,42 @@ namespace detail {
 		template<typename CharType>
 		struct is_stl_string<b_str<CharType>> : std::integral_constant<bool, is_char_type<remove_cv_t<CharType>>::value> {};
 	}
-	struct get_front {};
-	struct get_back {};
-	struct split_at_first {};
-	struct split_at_last {};
+	struct subroutine_base {};
+	template<typename T> struct is_subroutine : std::is_base_of<subroutine_base, T> {};
+	struct get_front : subroutine_base {};
+	struct get_back : subroutine_base {};
+	struct split_at_first_back : subroutine_base {};
+	struct split_at_first : subroutine_base {
+		constexpr get_front front() const { return{}; }
+		constexpr split_at_first_back back() const { return{}; }
+	};
+	struct split_at_last_front : subroutine_base {};
+	struct split_at_last : subroutine_base {
+		constexpr split_at_last_front front() const { return{}; }
+		constexpr get_back back() const { return{}; }
+	};
+	template<typename Subroutine, typename DelimType, typename CharType>
+	struct split_helper_subroutine {
+		using char_type = CharType;
+		DelimType delim;
+	};
 	template<typename DelimType, typename CharType>
 	struct split_helper_get_back { 
 		using char_type = CharType;
 		DelimType delim;
 	};
 	template<typename DelimType, typename CharType>
+	struct split_helper_split_at_first_back {
+		using char_type = CharType;
+		DelimType delim;
+	};
+	template<typename DelimType, typename CharType>
 	struct split_helper_split_at_first {
+		using char_type = CharType;
+		DelimType delim;
+	};
+	template<typename DelimType, typename CharType>
+	struct split_helper_split_at_last_front {
 		using char_type = CharType;
 		DelimType delim;
 	};
@@ -133,11 +158,10 @@ namespace detail {
 		CharType delim;
 		constexpr split_helper_index<CharType, true, false, false> operator[](size_t n) const noexcept { return{ delim, n }; }
 		template<typename FuncType>
-		constexpr split_helper_conv_func<CharType, FuncType, true, false, false> operator >> (FuncType&& f) const { return{ delim, std::forward<FuncType>(f) }; }
+		constexpr split_helper_conv_func<CharType, FuncType, true, false, false> operator>> (FuncType&& f) const { return{ delim, std::forward<FuncType>(f) }; }
 		constexpr split_helper_index<CharType, true, false, false> operator>>(get_front) const noexcept { return{ delim, 0 }; }
-		constexpr split_helper_get_back<CharType, CharType> operator>>(get_back) const noexcept { return{ delim }; }
-		constexpr split_helper_split_at_first<CharType, CharType> operator>>(split_at_first) const noexcept { return{ delim }; }
-		constexpr split_helper_split_at_last<CharType, CharType> operator>>(split_at_last) const noexcept { return{ delim }; }
+		template<typename Subroutine, std::enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
+		constexpr split_helper_subroutine<Subroutine, CharType, CharType> operator>> (Subroutine) const noexcept { return{ delim }; }
 	};
 	template<typename CStr>
 	struct split_helper<CStr, false, true, false> {
@@ -147,9 +171,8 @@ namespace detail {
 		template<typename FuncType>
 		constexpr split_helper_conv_func<CStr, FuncType, false, true, false> operator >> (FuncType&& f) const { return{ delim, std::forward<FuncType>(f) }; }
 		constexpr split_helper_index<CStr, false, true, false> operator>>(get_front) const noexcept { return{ delim, 0 }; }
-		constexpr split_helper_get_back<CStr, char_type> operator>>(get_back) const noexcept { return{ delim }; }
-		constexpr split_helper_split_at_first<CStr, char_type> operator>>(split_at_first) const noexcept { return{ delim }; }
-		constexpr split_helper_split_at_last<CStr, char_type> operator>>(split_at_last) const noexcept { return{ delim }; }
+		template<typename Subroutine, std::enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
+		constexpr split_helper_subroutine<Subroutine, CStr, char_type> operator>> (Subroutine) const noexcept { return{ delim }; }
 	};
 	template<typename StlString>
 	struct split_helper<StlString, false, false, true> {
@@ -159,28 +182,43 @@ namespace detail {
 		template<typename FuncType>
 		split_helper_conv_func<StlString, FuncType, false, false, true> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
 		split_helper_index<StlString, false, false, true> operator>>(get_front) const noexcept { return{ std::move(delim), 0 }; }
-		split_helper_get_back<StlString, char_type> operator>>(get_back) const noexcept { return{ std::move(delim) }; }
-		constexpr split_helper_split_at_first<StlString, char_type> operator>>(split_at_first) const noexcept { return{ delim }; }
-		constexpr split_helper_split_at_last<StlString, char_type> operator>>(split_at_last) const noexcept { return{ delim }; }
+		template<typename Subroutine, std::enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
+		split_helper_subroutine<Subroutine, StlString, char_type> operator>> (Subroutine) const noexcept { return{ std::move(delim) }; }
 	};
 	//back()の時
 	template<typename CharType, typename DelimType>
-	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_get_back<DelimType, CharType>& info)
+	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_subroutine<get_back, DelimType, CharType>& info)
 	{
 		const auto pos = str.find_first_of(info.delim);
 		return (b_str<CharType>::npos == pos) ? str : str.substr(str.find_last_of(info.delim) + 1);
 	}
+	//at_first().back()の時
+	template<typename CharType, typename DelimType>
+	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_subroutine<split_at_first_back, DelimType, CharType>& info)
+	{
+		const auto pos = str.find_first_of(info.delim);
+		if (b_str<CharType>::npos == pos) return {};
+		return str.substr(str.find_first_not_of(info.delim, pos));
+	}
 	//at_first()の時
 	template<typename CharType, typename DelimType>
-	std::array<b_str<CharType>, 2> operator| (const b_str<CharType>& str, const split_helper_split_at_first<DelimType, CharType>& info)
+	std::array<b_str<CharType>, 2> operator| (const b_str<CharType>& str, const split_helper_subroutine<split_at_first, DelimType, CharType>& info)
 	{
 		const auto pos = str.find_first_of(info.delim);
 		if (b_str<CharType>::npos == pos) return{ { str, {} } };
 		return{ {str.substr(0, pos), str.substr(str.find_first_not_of(info.delim, pos))} };
 	}
+	//at_last().front()の時
+	template<typename CharType, typename DelimType>
+	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_subroutine<split_at_last_front, DelimType, CharType>& info)
+	{
+		const auto pos = str.find_last_of(info.delim);
+		if (b_str<CharType>::npos == pos) return {};
+		return str.substr(0, str.find_last_not_of(info.delim, pos) + 1);
+	}
 	//at_last()の時
 	template<typename CharType, typename DelimType>
-	std::array<b_str<CharType>, 2> operator| (const b_str<CharType>& str, const split_helper_split_at_last<DelimType, CharType>& info)
+	std::array<b_str<CharType>, 2> operator| (const b_str<CharType>& str, const split_helper_subroutine<split_at_last, DelimType, CharType>& info)
 	{
 		const auto pos = str.find_last_of(info.delim);
 		if (b_str<CharType>::npos == pos) return{ { {}, str } };
@@ -334,15 +372,24 @@ namespace detail {
 	}
 	//back()の時
 	template<typename CharType, typename DelimType>
-	b_str<CharType> operator| (b_str<CharType>&& str, const split_helper_get_back<DelimType, CharType>& info)
+	b_str<CharType> operator| (b_str<CharType>&& str, const split_helper_subroutine<get_back, DelimType, CharType>& info)
 	{
 		const auto pos = str.find_first_of(info.delim);
 		if (b_str<CharType>::npos != pos) str.erase(0, str.find_last_of(info.delim) + 1);
 		return str;
 	}
+	//at_first().back()の時
+	template<typename CharType, typename DelimType>
+	b_str<CharType> operator| (b_str<CharType>&& str, const split_helper_subroutine<split_at_first, DelimType, CharType>& info)
+	{
+		const std::size_t pos = str.find_first_of(info.delim);
+		if (b_str<CharType>::npos == pos) return {};
+		str.erase(0, str.find_first_not_of(info.delim, pos) + 1);
+		return str;
+	}
 	//at_first()の時
 	template<typename CharType, typename DelimType>
-	std::array<b_str<CharType>, 2> operator| (b_str<CharType>&& str, const split_helper_split_at_first<DelimType, CharType>& info)
+	std::array<b_str<CharType>, 2> operator| (b_str<CharType>&& str, const split_helper_subroutine<split_at_first, DelimType, CharType>& info)
 	{
 		const std::size_t pos = str.find_first_of(info.delim);
 		if (b_str<CharType>::npos == pos) return{ { std::move(str),{} } };
@@ -352,9 +399,18 @@ namespace detail {
 		re[0] = std::move(str);
 		return re;
 	}
+	//at_last().front()の時
+	template<typename CharType, typename DelimType>
+	std::array<b_str<CharType>, 2> operator| (b_str<CharType>&& str, const split_helper_subroutine<split_at_last, DelimType, CharType>& info)
+	{
+		const std::size_t pos = str.find_last_of(info.delim);
+		if (b_str<CharType>::npos == pos) return {};
+		str.erase(0, pos + 1);
+		return str;
+	}
 	//at_last()の時
 	template<typename CharType, typename DelimType>
-	std::array<b_str<CharType>, 2> operator| (b_str<CharType>&& str, const split_helper_split_at_last<DelimType, CharType>& info)
+	std::array<b_str<CharType>, 2> operator| (b_str<CharType>&& str, const split_helper_subroutine<split_at_last, DelimType, CharType>& info)
 	{
 		const std::size_t pos = str.find_last_of(info.delim);
 		if (b_str<CharType>::npos == pos) return{ { {}, std::move(str) } };
