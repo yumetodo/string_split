@@ -30,6 +30,7 @@ namespace constant {
 
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_CHAR(space, ' ');
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_CHAR(comma, ',');
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_CHAR(colon, ':');
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_USTRING(wspace, "　");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(space_underscore, "_ ");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(space_comma, ", ");
@@ -44,6 +45,13 @@ namespace constant {
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_USTRING(sekai, "世界");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(csv_data_123_421_113, "123,421,113");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(csv_data_123_421_113_with_space, "123, 421, 113");
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(cpp_type_data1, "std::basic_istream<char, std::char_traits<char> >::ignore");
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(cpp_type_data2, "dxle::sound_c LoadSoundMem");
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(cpp_basic_istream, "std::basic_istream<char, std::char_traits<char> >");
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(cpp_basic_istream_part, "std::basic_istream<char,");
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(cpp_dxle_sound_c, "dxle::sound_c");
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(cpp_LoadSoundMem, "LoadSoundMem");
+	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(ignore, "ignore");
 
 #undef STRING_SPLIT_TEST_CONSTANT_REGISTER_CHAR
 #undef STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING
@@ -52,6 +60,31 @@ namespace constant {
 template<typename T>
 struct StringSplitLvalue : public ::iutest::Test {};
 IUTEST_TYPED_TEST_CASE(StringSplitLvalue, ::iutest::Types<char, wchar_t, char16_t, char32_t>);
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_front_by_singe_char)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::cpp_basic_istream<char_type>();
+	const auto re = s | split(constant::space<char_type>()) >> front();
+	IUTEST_ASSERT_EQ(constant::cpp_basic_istream_part<char_type>(), re);
+}
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_first_by_single_char)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::cpp_type_data2<char_type>();
+	const auto re = s | split(constant::space<char_type>()) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::cpp_dxle_sound_c<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::cpp_LoadSoundMem<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_last_by_single_char)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::cpp_type_data1<char_type>();
+	const auto re = s | split(constant::colon<char_type>()) >> at_last();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::cpp_basic_istream<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::ignore<char_type>(), re[1]);
+}
 IUTEST_TYPED_TEST(StringSplitLvalue, ExtractBySingeChar)
 {
 	using char_type = TypeParam;
@@ -78,7 +111,7 @@ IUTEST_TYPED_TEST(StringSplitLvalue, ExtractByCStr)
 	IUTEST_EXPECT_THROW(s | split(delim)[3250], std::out_of_range);
 	IUTEST_EXPECT_THROW(s | split(delim)[std::numeric_limits<std::size_t>::max()], std::out_of_range);
 }
-IUTEST_TYPED_TEST(StringSplitLvalue, ExtractByStlStrTest)
+IUTEST_TYPED_TEST(StringSplitLvalue, ExtractByStlStr)
 {
 	using char_type = TypeParam;
 	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
@@ -229,6 +262,31 @@ IUTEST_TYPED_TEST(StringSplitLvalueCovertToInt, NoReturnByStlStr)
 template<typename T>
 struct StringSplitRvalue : public ::iutest::Test {};
 IUTEST_TYPED_TEST_CASE(StringSplitRvalue, ::iutest::Types<char, wchar_t, char16_t, char32_t>);
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_front_by_singe_char)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const auto re = s(constant::cpp_basic_istream<char_type>()) | split(constant::space<char_type>()) >> front();
+	IUTEST_ASSERT_EQ(constant::cpp_basic_istream_part<char_type>(), re);
+}
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_first_by_single_char)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const auto re = s(constant::cpp_type_data2<char_type>()) | split(constant::space<char_type>()) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::cpp_dxle_sound_c<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::cpp_LoadSoundMem<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_last_by_single_char)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const auto re = s(constant::cpp_type_data1<char_type>()) | split(constant::colon<char_type>()) >> at_last();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::cpp_basic_istream<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::ignore<char_type>(), re[1]);
+}
 IUTEST_TYPED_TEST(StringSplitRvalue, ExtractBySingeChar)
 {
 	using char_type = TypeParam;
