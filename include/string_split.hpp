@@ -376,7 +376,7 @@ namespace detail {
 	{
 		const auto pos = str.find_first_of(info.delim);
 		if (b_str<CharType>::npos != pos) str.erase(0, str.find_last_of(info.delim) + 1);
-		return str;
+		return std::move(str);
 	}
 	//at_first().back()の時
 	template<typename CharType, typename DelimType>
@@ -385,7 +385,7 @@ namespace detail {
 		const std::size_t pos = str.find_first_of(info.delim);
 		if (b_str<CharType>::npos == pos) return {};
 		str.erase(0, str.find_first_not_of(info.delim, pos));
-		return str;
+		return std::move(str);
 	}
 	//at_first()の時
 	template<typename CharType, typename DelimType>
@@ -406,7 +406,7 @@ namespace detail {
 		const std::size_t pos = str.find_last_of(info.delim);
 		if (b_str<CharType>::npos == pos) return {};
 		str.erase(str.find_last_not_of(info.delim, pos) + 1);
-		return str;
+		return std::move(str);
 	}
 	//at_last()の時
 	template<typename CharType, typename DelimType>
@@ -435,7 +435,7 @@ namespace detail {
 		--pos;
 		if(pos <= str.size()) str.erase(pos);
 		str.erase(0, pre);
-		return str;
+		return std::move(str);
 	}
 	//区切り文字複数, operator[]の時
 	template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
@@ -454,7 +454,7 @@ namespace detail {
 		if (i < info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
 		if (pos <= str.size()) str.erase(pos);
 		str.erase(0, pre);
-		return str;
+		return std::move(str);
 	}
 	//区切り文字1文字, has chain funcの時
 	template<typename CharType, typename FuncType>
