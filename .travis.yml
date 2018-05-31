@@ -29,8 +29,7 @@ install:
         sudo make install
         cd ..
         pwd
-        gem install specific_install
-        gem specific_install -l 'git://github.com/pcolby/lcoveralls.git';
+        gem install lcoveralls;
       fi
     fi
 language: cpp
