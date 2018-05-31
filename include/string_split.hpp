@@ -86,7 +86,7 @@ namespace detail {
 		DelimType delim;
 	};
 	template<typename DelimType, typename CharType>
-	struct split_helper_get_back { 
+	struct split_helper_get_back {
 		using char_type = CharType;
 		DelimType delim;
 	};
@@ -113,7 +113,7 @@ namespace detail {
 	template<typename DelimType, bool is_single_char, bool is_c_str, bool is_stl_string>
 	struct split_helper_index;
 	template<typename CharType>
-	struct split_helper_index<CharType, true, false, false> { 
+	struct split_helper_index<CharType, true, false, false> {
 		using char_type = CharType;
 		CharType delim; size_t index;
 	};
@@ -271,7 +271,7 @@ namespace detail {
 	}
 	//区切り文字1文字, has chain convert funcの時
 	template<
-		typename CharType, typename FuncType, 
+		typename CharType, typename FuncType,
 		typename SplitHelperConvFunc = split_helper_conv_func<CharType, FuncType, true, false, false>
 	>
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
@@ -326,7 +326,7 @@ namespace detail {
 	}
 	//区切り文字複数, has chain convert funcの時
 	template<
-		typename CharType, typename DelimType, typename FuncType, 
+		typename CharType, typename DelimType, typename FuncType,
 		bool is_c_str, bool is_stl_string,
 		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>
 	>
@@ -360,7 +360,7 @@ namespace detail {
 		vector<b_str<CharType>> re;
 		size_t current = 0;
 		for (
-			size_t found = str.find_first_of(info.delim, current); 
+			size_t found = str.find_first_of(info.delim, current);
 			current != b_str<CharType>::npos && found != b_str<CharType>::npos;
 			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
@@ -473,7 +473,7 @@ namespace detail {
 	}
 	//区切り文字1文字, has chain convert funcの時
 	template<
-		typename CharType, typename FuncType, 
+		typename CharType, typename FuncType,
 		typename SplitHelperConvFunc = split_helper_conv_func<CharType, FuncType, true, false, false>
 	>
 	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
