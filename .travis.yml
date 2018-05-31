@@ -8,30 +8,30 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.8
+      - llvm-toolchain-trusty-6.0
       - llvm-toolchain-precise
     packages:
       #- lcov
-      - rubygems
-      - clang-3.8
-      - g++-5
-      - gcc-5
+      - ruby
+      - clang-6.0
+      - g++-7
+      - gcc-7
 before_install: git submodule update --init
 install:
   - export PLATFORM=$(uname -s)
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5" CCOV="gcov-5" USE_COVERAGE="lcov" USE_COVERALLS=1; fi
-  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.8"; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7" CCOV="gcov-7" USE_COVERAGE="lcov" USE_COVERALLS=1; fi
+  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-6.0" CC="clang-6.0"; fi
   - |
     if [ "${USE_COVERALLS}" = '1' ]; then
       if [ "${USE_COVERAGE}" = 'gcov' ]; then easy_install cpp-coveralls; fi
-      if [ "${USE_COVERAGE}" = 'lcov' ]; then 
+      if [ "${USE_COVERAGE}" = 'lcov' ]; then
         pwd
         git clone https://github.com/linux-test-project/lcov.git ./lcov
         cd lcov
         sudo make install
         cd ..
         pwd
-        gem install lcoveralls; 
+        gem install lcoveralls;
       fi
     fi
 language: cpp
