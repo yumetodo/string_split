@@ -1,8 +1,6 @@
 compiler:
   - clang
   - gcc
-cache:
-  apt: true
 sudo: required
 addons:
   apt:
