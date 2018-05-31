@@ -21,7 +21,11 @@ before_script:
 script:
   - cd iutest/tools/wandbox
   - python ./iuwandbox.py --list_options ${WANDBOX_COMPILER}
-  - python ./iuwandbox.py ../../../test/test.cpp -c ${WANDBOX_COMPILER} --default --encoding utf-8-sig --verbose --junit ../../../shippable/testresults/test_result.xml
+  - if [ "${WANDBOX_COMPILER}" = 'clang-3.7' ] || [ "${WANDBOX_COMPILER}" = 'gcc-4.9.2' ]; then
+      python ./iuwandbox.py ../../../test/test.cpp -c ${WANDBOX_COMPILER} --std c++14--encoding utf-8-sig --verbose --junit ../../../shippable/testresults/test_result.xml
+    else
+      python ./iuwandbox.py ../../../test/test.cpp -c ${WANDBOX_COMPILER} --std c++17 --encoding utf-8-sig --verbose --junit ../../../shippable/testresults/test_result.xml
+    fi
 
 env:
   matrix:
@@ -46,7 +50,7 @@ env:
 
 after_success:
   - echo OK
-  
+
 notifications:
   email:
     on_success: change

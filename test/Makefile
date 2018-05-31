@@ -14,7 +14,7 @@ CXX_DEBUG_FLAGS		=	-g -O0 -Wall -Wextra
 CXX_RELEASE_FLAGS	=	-O2 -Wall -Wextra
 
 # 基本オプション
-CPPFLAGS = -std=c++14
+CPPFLAGS = -std=c++17
 ifeq ($(OS),Windows_NT)
 CPPFLAGS += -lWs2_32
 endif
