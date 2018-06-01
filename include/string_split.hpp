@@ -286,7 +286,7 @@ namespace detail {
 		if (b_str<CharType>::npos == pos) return{ { {}, str } };
 		return { { str.substr(0, str.find_last_not_of(info.delim, pos) + 1), str.substr(pos + 1) } };
 	}
-	//区切り文字1文字, operator[]の時
+	//区切り文字1文字, operator[] or get_front()の時
 	template<typename CharType>
 	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_index<CharType, true, false, false>& info)
 	{
@@ -300,13 +300,31 @@ namespace detail {
 		if(i < info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
 		return str.substr(pre, pos - pre - 1);
 	}
-	//区切り文字複数, operator[]の時
+	//区切り文字複数, operator[] or get_front()の時
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<
+		typename StrType, typename DelimType, bool is_c_str, bool is_stl_string, typename CharType = typename StrType::char_type,
+		enable_if_t<!(is_c_str && is_stl_string) && std::conjunction_v<
+			std::disjunction<
+				type_traits::is_stl_string<StrType>,
+				type_traits::is_stl_string_view<StrType>
+			>,
+			std::is_same<CharType, typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type>
+		>, std::nullptr_t> = nullptr
+	>
+	auto operator| (const StrType& str, const split_helper_index<DelimType, false, is_c_str, is_stl_string>& info) -> StrType
+#else
 	template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
 	auto operator| (const b_str<CharType>& str, const split_helper_index<DelimType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && is_same<CharType, typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type>::value,
+			//is_c_str: true  && is_stl_string: true => impossible!!!
+			//is_c_str: true  && is_stl_string: false => const T*
+			//is_c_str: false && is_stl_string: true  => std::basic_string
+			//is_c_str: false && is_stl_string: false => std::basic_string_view
+			!(is_c_str && is_stl_string) && is_same<CharType, typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type>::value,
 			b_str<CharType>
 		>
+#endif
 	{
 		size_t pre = 0, pos = 0, i;
 		for (i = 0; i < info.index + 1; ++i) {

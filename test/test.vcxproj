@@ -245,6 +245,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="test_cxx17_string_view.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constant.hpp" />
