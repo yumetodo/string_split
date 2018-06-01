@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
   Copyright (C) 2016-2018 yumetodo
 
   Distributed under the Boost Software License, Version 1.0.
@@ -13,19 +13,19 @@
 #include <stdexcept>
 #if defined(_MSC_VER)
 #	if _MSC_VER >= 1910 && _MSVC_LANG >= 201703
-#		define HAS_CXX17_STRING_VIEW 1
+#		define STRING_SPLIT_HAS_CXX17_STRING_VIEW 1
 #	endif
 #elif defined(__clang__)
 #	if __clang_major__ >= 4 && __cplusplus >= 201703
-#		define HAS_CXX17_STRING_VIEW 1
+#		define STRING_SPLIT_HAS_CXX17_STRING_VIEW 1
 #	endif
 #elif defined(__GCC__)
 #	if (__GCC__ > 7 || (__GCC__ == 7 && __GNUC_MINOR__ >= 1)) && __cplusplus >= 201703
-#		define HAS_CXX17_STRING_VIEW 1
+#		define STRING_SPLIT_HAS_CXX17_STRING_VIEW 1
 #	endif
 #endif
 
-#ifdef HAS_CXX17_STRING_VIEW
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 #	include <string_view>
 #endif
 
@@ -607,4 +607,4 @@ constexpr detail::get_back back() noexcept { return{}; }
 constexpr detail::split_at_first at_first() noexcept { return{}; }
 constexpr detail::split_at_last at_last() noexcept { return{}; }
 
-#undef HAS_CXX17_STRING_VIEW
+#undef STRING_SPLIT_HAS_CXX17_STRING_VIEW
