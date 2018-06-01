@@ -606,5 +606,3 @@ constexpr detail::get_front front() noexcept { return{}; }
 constexpr detail::get_back back() noexcept { return{}; }
 constexpr detail::split_at_first at_first() noexcept { return{}; }
 constexpr detail::split_at_last at_last() noexcept { return{}; }
-
-#undef STRING_SPLIT_HAS_CXX17_STRING_VIEW
