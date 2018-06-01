@@ -44,6 +44,9 @@
 namespace detail {
 	using std::vector;
 	template<typename CharType> using b_str = std::basic_string<CharType>;
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<typename CharType> using b_str_view = std::basic_string_view<CharType>;
+#endif
 	using std::is_same;
 	using std::size_t;
 	template<bool con, typename T>
@@ -83,6 +86,18 @@ namespace detail {
 		template<typename T> struct is_stl_string<T const volatile> : is_stl_string<T> {};
 		template<typename CharType>
 		struct is_stl_string<b_str<CharType>> : std::integral_constant<bool, is_char_type<remove_cv_t<CharType>>::value> {};
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+		//
+		// is_stl_string_view
+		//
+		template<typename T>
+		struct is_stl_string_view : conditional_t<std::is_reference<T>::value, is_stl_string_view<remove_reference_t<T>>, std::false_type> {};
+		template<typename T> struct is_stl_string_view<T const> : is_stl_string_view<T> {};
+		template<typename T> struct is_stl_string_view<T volatile> : is_stl_string_view<T> {};
+		template<typename T> struct is_stl_string_view<T const volatile> : is_stl_string_view<T> {};
+		template<typename CharType>
+		struct is_stl_string_view<b_str_view<CharType>> : std::integral_constant<bool, is_char_type<remove_cv_t<CharType>>::value> {};
+#endif
 	}
 	struct subroutine_base {};
 	template<typename T> struct is_subroutine : std::is_base_of<subroutine_base, T> {};
@@ -145,6 +160,13 @@ namespace detail {
 		using char_type = typename StlString::value_type;
 		b_str<char_type> delim; size_t index;
 	};
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<typename StlStringView>
+	struct split_helper_index<StlStringView, false, false, false> {
+		using char_type = typename StlStringView::value_type;
+		b_str_view<char_type> delim; size_t index;
+	};
+#endif
 	template<typename DelimType, typename FuncType, bool is_single_char, bool is_c_str, bool is_stl_string>
 	struct split_helper_conv_func;
 	template<typename CharType, typename FuncType>
@@ -168,6 +190,15 @@ namespace detail {
 		static constexpr bool result_is_void = std::is_same<void, result_type>::value;
 		b_str<char_type> delim; FuncType f;
 	};
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<typename StlStringView, typename FuncType>
+	struct split_helper_conv_func<StlStringView, FuncType, false, false, false> {
+		using char_type = typename StlStringView::value_type;
+		using result_type = std::invoke_result_t<FuncType, std::basic_string_view<char_type>>;
+		static constexpr bool result_is_void = std::is_same<void, result_type>::value;
+		b_str<char_type> delim; FuncType f;
+	};
+#endif
 	template<typename DelimType, bool is_single_char, bool is_c_str, bool is_stl_string>
 	struct split_helper;
 	template<typename CharType>
@@ -203,6 +234,19 @@ namespace detail {
 		template<typename Subroutine, enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
 		split_helper_subroutine<Subroutine, StlString, char_type> operator>> (Subroutine) const noexcept { return{ std::move(delim) }; }
 	};
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<typename StlStringView>
+	struct split_helper<StlStringView, false, false, false> {
+		using char_type = typename StlStringView::value_type;
+		b_str_view<char_type> delim;
+		split_helper_index<StlStringView, false, false, false> operator[](size_t n) const noexcept { return{ std::move(delim), n }; }
+		template<typename FuncType, enable_if_t<!is_subroutine<FuncType>::value, std::nullptr_t> = nullptr>
+		split_helper_conv_func<StlStringView, FuncType, false, false, true> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
+		split_helper_index<StlStringView, false, false, false> operator>>(get_front) const noexcept { return{ std::move(delim), 0 }; }
+		template<typename Subroutine, enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
+		split_helper_subroutine<Subroutine, StlStringView, char_type> operator>> (Subroutine) const noexcept { return{ std::move(delim) }; }
+	};
+#endif
 	//back()の時
 	template<typename CharType, typename DelimType>
 	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_subroutine<get_back, DelimType, CharType>& info)
@@ -602,6 +646,10 @@ template<typename CStr, typename std::enable_if<detail::type_traits::is_c_str<CS
 constexpr detail::split_helper<CStr, false, true, false> split(CStr delim) noexcept { return{ delim }; }
 template<typename StlString, typename std::enable_if<detail::type_traits::is_stl_string<StlString>::value, std::nullptr_t>::type = nullptr>
 detail::split_helper<StlString, false, false, true> split(StlString delim) noexcept { return{ std::move(delim) }; }
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+template<typename StlStringView, typename std::enable_if<detail::type_traits::is_stl_string_view<StlStringView>::value, std::nullptr_t>::type = nullptr>
+detail::split_helper<StlStringView, false, false, false> split(StlStringView delim) noexcept { return{ delim }; }
+#endif
 constexpr detail::get_front front() noexcept { return{}; }
 constexpr detail::get_back back() noexcept { return{}; }
 constexpr detail::split_at_first at_first() noexcept { return{}; }
