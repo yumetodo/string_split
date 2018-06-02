@@ -303,7 +303,7 @@ namespace detail {
 	//区切り文字複数, operator[] or get_front()の時
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 	template<
-		typename StrType, typename DelimType, bool is_c_str, bool is_stl_string, typename CharType = typename StrType::char_type,
+		typename StrType, typename DelimType, bool is_c_str, bool is_stl_string, typename CharType = typename StrType::value_type,
 		enable_if_t<!(is_c_str && is_stl_string) && std::conjunction_v<
 			std::disjunction<
 				type_traits::is_stl_string<StrType>,
