@@ -97,6 +97,22 @@ namespace detail {
 		template<typename T> struct is_stl_string_view<T const volatile> : is_stl_string_view<T> {};
 		template<typename CharType>
 		struct is_stl_string_view<b_str_view<CharType>> : std::integral_constant<bool, is_char_type<remove_cv_t<CharType>>::value> {};
+		template<typename T> constexpr bool is_stl_string_view_v = is_stl_string_view<T>::value;
+		//
+		// is_stl_string_or_stl_string_view
+		//
+		template<typename T> struct is_stl_string_or_stl_string_view : std::disjunction<
+			type_traits::is_stl_string<T>,
+			type_traits::is_stl_string_view<T>
+		> {};
+		//
+		// contract_str_type
+		//
+		template<typename StrType, typename CharType> struct contract_str_type : std::conjunction<
+			type_traits::is_stl_string_or_stl_string_view<StrType>,
+			std::is_same<CharType, typename StrType::value_type>
+		> {};
+		template<typename StrType, typename CharType> constexpr bool contract_str_type_v = contract_str_type<StrType, CharType>::value;
 #endif
 	}
 	struct subroutine_base {};
@@ -303,16 +319,14 @@ namespace detail {
 	//区切り文字複数, operator[] or get_front()の時
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 	template<
-		typename StrType, typename DelimType, bool is_c_str, bool is_stl_string, typename CharType = typename StrType::value_type,
-		enable_if_t<!(is_c_str && is_stl_string) && std::conjunction_v<
-			std::disjunction<
-				type_traits::is_stl_string<StrType>,
-				type_traits::is_stl_string_view<StrType>
-			>,
-			std::is_same<CharType, typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type>
+		typename StrType, typename DelimType, bool is_c_str, bool is_stl_string,
+		enable_if_t<!(is_c_str && is_stl_string) && type_traits::contract_str_type_v<
+			StrType,
+			typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type
 		>, std::nullptr_t> = nullptr
 	>
 	auto operator| (const StrType& str, const split_helper_index<DelimType, false, is_c_str, is_stl_string>& info) -> StrType
+	{
 #else
 	template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
 	auto operator| (const b_str<CharType>& str, const split_helper_index<DelimType, false, is_c_str, is_stl_string>& info)
@@ -324,13 +338,14 @@ namespace detail {
 			!(is_c_str && is_stl_string) && is_same<CharType, typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type>::value,
 			b_str<CharType>
 		>
-#endif
 	{
+		using StrType = b_str<CharType>;
+#endif
 		size_t pre = 0, pos = 0, i;
 		for (i = 0; i < info.index + 1; ++i) {
 			if(pos) pre = pos = str.find_first_not_of(info.delim, pos);
 			pos = str.find_first_of(info.delim, pos);
-			if (b_str<CharType>::npos == pos) break;
+			if (StrType::npos == pos) break;
 		}
 		if (i < info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
 		return str.substr(pre, pos - pre);
