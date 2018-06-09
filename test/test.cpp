@@ -34,6 +34,15 @@ IUTEST_TYPED_TEST(StringSplitLvalue, chain_front_by_stl_str)
 	const std::basic_string<char_type> delim = constant::space_underscore<char_type>();
 	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), s | split(delim) >> front());
 }
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_front_by_stl_str_view)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const std::basic_string_view<char_type> delim = constant::space_underscore<char_type>();
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), s | split(delim) >> front());
+}
+#endif
 IUTEST_TYPED_TEST(StringSplitLvalue, chain_back_by_singe_char)
 {
 	using char_type = TypeParam;
@@ -204,6 +213,21 @@ IUTEST_TYPED_TEST(StringSplitLvalue, ExtractByStlStr)
 	IUTEST_EXPECT_THROW(s | split(delim)[3250], std::out_of_range);
 	IUTEST_EXPECT_THROW(s | split(delim)[std::numeric_limits<std::size_t>::max()], std::out_of_range);
 }
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+IUTEST_TYPED_TEST(StringSplitLvalue, ExtractByStlStrView)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const std::basic_string_view<char_type> delim = constant::space_underscore<char_type>();
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), s | split(delim)[0]);
+	IUTEST_ASSERT_EQ(constant::na<char_type>(), s | split(delim)[1]);
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), s | split(delim)[2]);
+	IUTEST_EXPECT_THROW(s | split(delim)[3], std::out_of_range);
+	IUTEST_EXPECT_THROW(s | split(delim)[5], std::out_of_range);
+	IUTEST_EXPECT_THROW(s | split(delim)[3250], std::out_of_range);
+	IUTEST_EXPECT_THROW(s | split(delim)[std::numeric_limits<std::size_t>::max()], std::out_of_range);
+}
+#endif
 namespace StringSplitLvalue_SplitBySingeChar {
 	template<typename CharType, std::enable_if_t<!std::is_same<CharType, char>::value, std::nullptr_t> = nullptr>
 	void without_char()
@@ -365,6 +389,16 @@ IUTEST_TYPED_TEST(StringSplitRvalue, chain_front_by_stl_str)
 	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(delim) >> front();
 	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re);
 }
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_front_by_stl_str_view)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const std::basic_string_view<char_type> delim = constant::space_underscore<char_type>();
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(delim) >> front();
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re);
+}
+#endif
 IUTEST_TYPED_TEST(StringSplitRvalue, chain_back_by_singe_char)
 {
 	using char_type = TypeParam;
@@ -544,6 +578,22 @@ IUTEST_TYPED_TEST(StringSplitRvalue, ExtractByStlStr)
 	IUTEST_EXPECT_THROW(s(constant::arikitari_na_world_underscore<char_type>()) | split(delim)[3250], std::out_of_range);
 	IUTEST_EXPECT_THROW(s(constant::arikitari_na_world_underscore<char_type>()) | split(delim)[lim::max()], std::out_of_range);
 }
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+IUTEST_TYPED_TEST(StringSplitRvalue, ExtractByStlStrView)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	using lim = std::numeric_limits<std::size_t>;
+	const std::basic_string_view<char_type> delim = constant::space_underscore<char_type>();
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), s(constant::arikitari_na_world_underscore<char_type>()) | split(delim)[0]);
+	IUTEST_ASSERT_EQ(constant::na<char_type>(), s(constant::arikitari_na_world_underscore<char_type>()) | split(delim)[1]);
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), s(constant::arikitari_na_world_underscore<char_type>()) | split(delim)[2]);
+	IUTEST_EXPECT_THROW(s(constant::arikitari_na_world_underscore<char_type>()) | split(delim)[3], std::out_of_range);
+	IUTEST_EXPECT_THROW(s(constant::arikitari_na_world_underscore<char_type>()) | split(delim)[5], std::out_of_range);
+	IUTEST_EXPECT_THROW(s(constant::arikitari_na_world_underscore<char_type>()) | split(delim)[3250], std::out_of_range);
+	IUTEST_EXPECT_THROW(s(constant::arikitari_na_world_underscore<char_type>()) | split(delim)[lim::max()], std::out_of_range);
+}
+#endif
 namespace StringSplitRvalue_SplitBySingeChar {
 	template<typename CharType, std::enable_if_t<!std::is_same<CharType, char>::value, std::nullptr_t> = nullptr>
 	void without_char()
