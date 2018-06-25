@@ -64,6 +64,15 @@ IUTEST_TYPED_TEST(StringSplitLvalue, chain_back_by_stl_str)
 	const std::basic_string<char_type> delim = constant::space_underscore<char_type>();
 	IUTEST_ASSERT_EQ(constant::world<char_type>(), s | split(delim) >> back());
 }
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_back_by_stl_str_view)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const std::basic_string_view<char_type> delim = constant::space_underscore<char_type>();
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), s | split(delim) >> back());
+}
+#endif
 IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_first_front)
 {
 	using char_type = TypeParam;
@@ -422,6 +431,16 @@ IUTEST_TYPED_TEST(StringSplitRvalue, chain_back_by_stl_str)
 	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(delim) >> back();
 	IUTEST_ASSERT_EQ(constant::world<char_type>(), re);
 }
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+IUTEST_TYPED_TEST(StringSplitRvalue, chain_back_by_stl_str_view)
+{
+	using char_type = TypeParam;
+	using s = std::basic_string<char_type>;
+	const std::basic_string_view<char_type> delim = constant::space_underscore<char_type>();
+	const auto re = s(constant::arikitari_na_world_underscore<char_type>()) | split(delim) >> back();
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), re);
+}
+#endif
 IUTEST_TYPED_TEST(StringSplitRvalue, chain_at_first_front)
 {
 	using char_type = TypeParam;
