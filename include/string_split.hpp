@@ -166,6 +166,10 @@ namespace detail {
 		using char_type = CharType;
 		CharType delim; size_t index;
 	};
+	template<typename CharType>
+	struct split_helper_get_front : split_helper_index<CharType, true, false, false> {
+		constexpr split_helper_get_front(CharType d) : split_helper_index<CharType, true, false, false>({d, 0}) {}
+	};
 	template<typename CStr>
 	struct split_helper_index<CStr, false, true, false> {
 		using char_type = remove_cv_t<remove_pointer_t<CStr>>;
@@ -224,7 +228,7 @@ namespace detail {
 		constexpr split_helper_index<CharType, true, false, false> operator[](size_t n) const noexcept { return{ delim, n }; }
 		template<typename FuncType, enable_if_t<!is_subroutine<FuncType>::value, std::nullptr_t> = nullptr>
 		constexpr split_helper_conv_func<CharType, FuncType, true, false, false> operator>> (FuncType&& f) const { return{ delim, std::forward<FuncType>(f) }; }
-		constexpr split_helper_index<CharType, true, false, false> operator>>(get_front) const noexcept { return{ delim, 0 }; }
+		constexpr split_helper_get_front<CharType> operator>>(get_front) const noexcept { return{ delim }; }
 		template<typename Subroutine, enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
 		constexpr split_helper_subroutine<Subroutine, CharType, CharType> operator>> (Subroutine) const noexcept { return{ delim }; }
 	};
@@ -302,21 +306,39 @@ namespace detail {
 		if (b_str<CharType>::npos == pos) return{ { {}, str } };
 		return { { str.substr(0, str.find_last_not_of(info.delim, pos) + 1), str.substr(pos + 1) } };
 	}
-	//区切り文字1文字, operator[] or get_front()の時
+	//区切り文字1文字, operator[] or front()の時
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<
+		typename StrType, typename CharType,
+		enable_if_t<type_traits::contract_str_type_v<StrType, CharType>, std::nullptr_t> = nullptr
+	>
+	StrType operator| (const StrType& str, const split_helper_index<CharType, true, false, false>& info)
+	{
+#else
 	template<typename CharType>
 	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_index<CharType, true, false, false>& info)
 	{
+		using StrType = b_str<CharType>;
+#endif
 		size_t pre = 0, pos = 0, i;
 		for (i = 0; i < info.index + 1; ++i) {
 			pre = pos;
 			pos = str.find_first_of(info.delim, pos);
-			if (b_str<CharType>::npos == pos) break;
+			if (StrType::npos == pos) break;
 			++pos;
 		}
 		if(i < info.index) throw std::out_of_range("index(" + std::to_string(info.index) + ") is too big.");
 		return str.substr(pre, pos - pre - 1);
 	}
-	//区切り文字複数, operator[] or get_front()の時
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	//区切り文字1文字, front()の時
+	template<typename CharType>
+	b_str_view<CharType> operator| (const b_str_view<CharType>& str, const split_helper_get_front<CharType>& info) noexcept
+	{
+		return str.substr(0, str.find_first_of(info.delim));
+	}
+#endif
+	//区切り文字複数, operator[] or front()の時
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 	template<
 		typename StrType, typename DelimType, bool is_c_str, bool is_stl_string,
