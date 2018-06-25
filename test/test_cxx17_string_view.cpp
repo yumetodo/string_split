@@ -8,6 +8,13 @@
 template<typename T>
 struct StringViewSplit : public ::iutest::Test {};
 IUTEST_TYPED_TEST_CASE(StringViewSplit, ::iutest::Types<char, wchar_t, char16_t, char32_t>);
+IUTEST_TYPED_TEST(StringViewSplit, chain_front_by_singe_char)
+{
+	using char_type = TypeParam;
+	const std::basic_string_view<char_type> s = constant::cpp_basic_istream<char_type>();
+	const auto re = s | split(constant::space<char_type>()) >> front();
+	IUTEST_ASSERT_EQ(std::basic_string_view<char_type>(constant::cpp_basic_istream_part<char_type>()), re);
+}
 IUTEST_TYPED_TEST(StringViewSplit, chain_front_by_c_str)
 {
 	using char_type = TypeParam;
@@ -28,6 +35,19 @@ IUTEST_TYPED_TEST(StringViewSplit, chain_front_by_stl_str_view)
 	const std::basic_string_view<char_type> s = constant::arikitari_na_world_underscore<char_type>();
 	const std::basic_string_view<char_type> delim = constant::space_underscore<char_type>();
 	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), s | split(delim) >> front());
+}
+IUTEST_TYPED_TEST(StringViewSplit, ExtractBySingeChar)
+{
+	using char_type = TypeParam;
+	constexpr char_type space = constant::space<char_type>();
+	const std::basic_string<char_type> s = constant::arikitari_na_world<char_type>();
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), s | split(space)[0]);
+	IUTEST_ASSERT_EQ(constant::na<char_type>(), s | split(space)[1]);
+	IUTEST_ASSERT_EQ(constant::world<char_type>(), s | split(space)[2]);
+	IUTEST_EXPECT_THROW(s | split(space)[3], std::out_of_range);
+	IUTEST_EXPECT_THROW(s | split(space)[5], std::out_of_range);
+	IUTEST_EXPECT_THROW(s | split(space)[3250], std::out_of_range);
+	IUTEST_EXPECT_THROW(s | split(space)[std::numeric_limits<std::size_t>::max()], std::out_of_range);
 }
 IUTEST_TYPED_TEST(StringViewSplit, ExtractByCStr)
 {
