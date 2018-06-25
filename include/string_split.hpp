@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
   Copyright (C) 2016-2018 yumetodo
 
   Distributed under the Boost Software License, Version 1.0.
@@ -268,11 +268,21 @@ namespace detail {
 	};
 #endif
 	//back()の時
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<
+		typename StrType, typename DelimType, typename CharType,
+		enable_if_t<type_traits::contract_str_type_v<StrType, CharType>, std::nullptr_t> = nullptr
+	>
+	StrType operator| (const StrType& str, const split_helper_subroutine<get_back, DelimType, CharType>& info) noexcept(type_traits::is_stl_string_view_v<StrType>)
+	{
+#else
 	template<typename CharType, typename DelimType>
 	b_str<CharType> operator| (const b_str<CharType>& str, const split_helper_subroutine<get_back, DelimType, CharType>& info)
 	{
+		using StrType = b_str<CharType>;
+#endif
 		const auto pos = str.find_first_of(info.delim);
-		return (b_str<CharType>::npos == pos) ? str : str.substr(str.find_last_of(info.delim) + 1);
+		return (StrType::npos == pos) ? str : str.substr(str.find_last_of(info.delim) + 1);
 	}
 	//at_first().back()の時
 	template<typename CharType, typename DelimType>
