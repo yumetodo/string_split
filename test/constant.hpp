@@ -1,6 +1,5 @@
 ﻿#ifndef STRING_SPLIT_TEST_CONSTANT_HPP_
 #define STRING_SPLIT_TEST_CONSTANT_HPP_
-#include <cuchar>
 namespace constant {
 #define STRING_SPLIT_TEST_CONSTANT_REGISTER_CHAR(identifier, no_prefix_char_literal) \
 	template<typename CharType> inline constexpr CharType identifier(); \
