@@ -25,17 +25,17 @@ endif()
 #
 # Set our project name
 #
-project(test)
+project(basic_test)
 
 #
 # Source files
 #
-set(test_src
+set(basic_test_src
     "./test.cpp"
 )
 if(CMAKE_CXX_STANDARD GREATER_EQUAL 17)
     message("C++17 sources enabled")
-    list(APPEND test_src "./test_cxx17_string_view.cpp")
+    list(APPEND basic_test_src "./test_cxx17_string_view.cpp")
 endif()
 
 if(STRING_SPLIT_ENABLE_COVERAGE)
@@ -45,8 +45,8 @@ if(STRING_SPLIT_ENABLE_COVERAGE)
     set(COVERAGE_EXCLUDES "*gcc*" "*iutest*" "*/usr/include/*" "*mingw*")
     SETUP_TARGET_FOR_COVERAGE(
         NAME test_coverage       # New target name
-        EXECUTABLE test          # Executable in PROJECT_BINARY_DIR
-        DEPENDENCIES test        # Dependencies to build first
+        EXECUTABLE basic_test          # Executable in PROJECT_BINARY_DIR
+        DEPENDENCIES basic_test        # Dependencies to build first
     )
     option(STRING_SPLIT_ENABLE_COVERAGE_HTML "enable coverage result to html" TRUE)
     option(STRING_SPLIT_ENABLE_COVERAGE_SEND "send coverage result" FALSE)
@@ -78,18 +78,18 @@ endif()
 #
 # Compile
 #
-add_executable(test ${test_src})
+add_executable(basic_test ${basic_test_src})
 
 #
 # Link
 #
 if(WIN32)
-    target_link_libraries(test ws2_32)
+    target_link_libraries(basic_test ws2_32)
 endif()
 
 add_custom_target(run_test
-    COMMAND test
+    COMMAND basic_test
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-    DEPENDS test
+    DEPENDS basic_test
     COMMENT "Execute produced executable."
 )
