@@ -19,8 +19,8 @@
 #	if __clang_major__ >= 4 && __cplusplus >= 201703
 #		define STRING_SPLIT_HAS_CXX17_STRING_VIEW 1
 #	endif
-#elif defined(__GCC__)
-#	if (__GCC__ > 7 || (__GCC__ == 7 && __GNUC_MINOR__ >= 1)) && __cplusplus >= 201703
+#elif defined(__GNUC__)
+#	if (__GNUC__ > 7 || (__GNUC__ == 7 && __GNUC_MINOR__ >= 1)) && __cplusplus >= 201703
 #		define STRING_SPLIT_HAS_CXX17_STRING_VIEW 1
 #	endif
 #endif
