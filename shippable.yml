@@ -25,7 +25,7 @@ script:
   - export TEST_RESULT=../../../shippable/testresults/test_result.xml
   - export STD_VER=c++17
   - if [ "${WANDBOX_COMPILER}" = 'clang-3.7.1' ] || [ "${WANDBOX_COMPILER}" = 'gcc-4.9.2' ]; then export STD_VER=c++14 ; fi
-  - python ./iuwandbox.py ${SRC} -c ${WANDBOX_COMPILER} --std ${STD_VER} --encoding utf-8-sig --verbose --junit ${TEST_RESULT}
+  - python ./iuwandbox.py ${SRC} -c ${WANDBOX_COMPILER} --std ${STD_VER} --encoding utf-8-sig --boost nothing --verbose --junit ${TEST_RESULT}
 
 env:
   matrix:
