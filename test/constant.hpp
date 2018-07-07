@@ -19,6 +19,10 @@ namespace constant {
 	template<> inline constexpr const char16_t* identifier<char16_t>() { return u ## no_prefix_string_literal; } \
 	template<> inline constexpr const char32_t* identifier<char32_t>() { return U ## no_prefix_string_literal; }
 
+#ifdef __GNUC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wpedantic"
+#endif
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_CHAR(space, ' ');
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_CHAR(comma, ',');
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_CHAR(colon, ':');
@@ -45,6 +49,9 @@ namespace constant {
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(cpp_dxle_sound_c, "dxle::sound_c");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(cpp_LoadSoundMem, "LoadSoundMem");
 	STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING(ignore, "ignore");
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
+#endif
 
 #undef STRING_SPLIT_TEST_CONSTANT_REGISTER_CHAR
 #undef STRING_SPLIT_TEST_CONSTANT_REGISTER_STRING
