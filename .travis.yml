@@ -44,4 +44,7 @@ script:
   - make ci
 after_success:
   # Coverage
-  - if [ "${USE_COVERALLS}" = '1' ]; then lcoveralls --retry-count 3 ./build_debug/test/coverage.info.cleaned ; fi
+  - ls $TRAVIS_BUILD_DIR
+  - ls "$TRAVIS_BUILD_DIR/build_debug"
+  - ls "$TRAVIS_BUILD_DIR/build_debug/test"
+  - if [ "${USE_COVERALLS}" = '1' ]; then lcoveralls --retry-count 3 "$TRAVIS_BUILD_DIR/build_debug/test/test_coverage.info.cleaned" ; fi
