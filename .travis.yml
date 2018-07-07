@@ -34,7 +34,14 @@ install:
     fi
 language: cpp
 script:
-  - make Release USE_COVERAGE=0 && ./test/test.out && ./sample/sample.out && make clean && make Debug && ./test/test.out && ./sample/sample.out
+  - mkdir build_release
+  - mkdir build_debug
+  - cd build_release
+  - cmake -DCMAKE_BUILD_TYPE=Release ..
+  - make ci
+  - cd ../build_debug
+  - cmake -DSTRING_SPLIT_ENABLE_COVERAGE="${USE_COVERALLS}" -DCMAKE_BUILD_TYPE=Debug ..
+  - make ci
 after_success:
   # Coverage
-  - if [ "${USE_COVERALLS}" = '1' ]; then cd ./test; make send-coveralls; fi
+  - if [ "${USE_COVERALLS}" = '1' ]; then lcoveralls --retry-count 3 ./build_debug/test/coverage.info.cleaned ; fi
