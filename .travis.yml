@@ -44,6 +44,8 @@ script:
   - make ci
 after_success:
   # Coverage
+  - pwd
+  - cd $TRAVIS_BUILD_DIR
   - ls $TRAVIS_BUILD_DIR
   - ls "$TRAVIS_BUILD_DIR/build_debug"
   - ls "$TRAVIS_BUILD_DIR/build_debug/test"
