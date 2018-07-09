@@ -137,6 +137,17 @@ IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_first_by_stl_str)
 	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re[0]);
 	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re[1]);
 }
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_first_by_stl_str_view)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const auto re = s | split(std::basic_string_view<char_type>(constant::space_underscore<char_type>())) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re[1]);
+}
+#endif
 IUTEST_TYPED_TEST(StringSplitLvalue, chain_at_last_front_by_single_char)
 {
 	using char_type = TypeParam;

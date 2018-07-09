@@ -99,6 +99,42 @@ IUTEST_TYPED_TEST(StringViewSplit, chain_at_first_back_by_stl_str_view)
 	const auto re = s | split(std::basic_string_view<char_type>(constant::space_underscore<char_type>())) >> at_first().back();
 	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re);
 }
+IUTEST_TYPED_TEST(StringViewSplit, chain_at_first_by_single_char)
+{
+	using char_type = TypeParam;
+	const std::basic_string_view<char_type> s = constant::cpp_type_data2<char_type>();
+	const auto re = s | split(constant::space<char_type>()) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::cpp_dxle_sound_c<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::cpp_LoadSoundMem<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringViewSplit, chain_at_first_by_c_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string_view<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const auto re = s | split(constant::space_underscore<char_type>()) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringViewSplit, chain_at_first_by_stl_str)
+{
+	using char_type = TypeParam;
+	const std::basic_string_view<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const auto re = s | split(std::basic_string<char_type>(constant::space_underscore<char_type>())) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re[1]);
+}
+IUTEST_TYPED_TEST(StringViewSplit, chain_at_first_by_stl_str_view)
+{
+	using char_type = TypeParam;
+	const std::basic_string_view<char_type> s = constant::arikitari_na_world_underscore<char_type>();
+	const auto re = s | split(std::basic_string_view<char_type>(constant::space_underscore<char_type>())) >> at_first();
+	IUTEST_ASSERT(2u == re.size());
+	IUTEST_ASSERT_EQ(constant::arikitari<char_type>(), re[0]);
+	IUTEST_ASSERT_EQ(constant::na_world<char_type>(), re[1]);
+}
 IUTEST_TYPED_TEST(StringViewSplit, ExtractBySingeChar)
 {
 	using char_type = TypeParam;
