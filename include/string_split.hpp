@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
   Copyright (C) 2016-2018 yumetodo
 
   Distributed under the Boost Software License, Version 1.0.
@@ -299,7 +299,7 @@ namespace detail {
 		using StrType = b_str<CharType>;
 #endif
 		const auto pos = str.find_first_of(info.delim);
-		if (b_str<CharType>::npos == pos) return {};
+		if (StrType::npos == pos) return {};
 		return str.substr(str.find_first_not_of(info.delim, pos));
 	}
 	//at_first()の時
