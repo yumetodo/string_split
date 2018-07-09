@@ -1,4 +1,4 @@
-﻿#include "../include/string_split.hpp"
+#include "../include/string_split.hpp"
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 #include "../iutest/include/iutest.hpp"
 #include "constant.hpp"
@@ -64,6 +64,14 @@ IUTEST_TYPED_TEST(StringViewSplit, chain_back_by_stl_str_view)
 	const std::basic_string_view<char_type> delim = constant::space_underscore<char_type>();
 	IUTEST_ASSERT_EQ(constant::world<char_type>(), s | split(delim) >> back());
 }
+IUTEST_TYPED_TEST(StringViewSplit, chain_at_first_front)
+{
+	using char_type = TypeParam;
+	const std::basic_string_view<char_type> s = constant::cpp_type_data2<char_type>();
+	const auto re = s | split(constant::space<char_type>()) >> at_first().front();
+	IUTEST_ASSERT_EQ(constant::cpp_dxle_sound_c<char_type>(), re);
+}
+IUTEST_TYPED_TEST(StringViewSplit, chain_at_first_back_by_single_char)
 IUTEST_TYPED_TEST(StringViewSplit, ExtractBySingeChar)
 {
 	using char_type = TypeParam;
