@@ -339,11 +339,21 @@ namespace detail {
 		return str.substr(0, str.find_last_not_of(info.delim, pos) + 1);
 	}
 	//at_last()の時
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<
+		typename StrType, typename DelimType, typename CharType,
+		enable_if_t<type_traits::contract_str_type_v<StrType, CharType>, std::nullptr_t> = nullptr
+	>
+	std::array<StrType, 2> operator| (const StrType& str, const split_helper_subroutine<split_at_last, DelimType, CharType>& info) noexcept(type_traits::is_stl_string_view_v<StrType>)
+	{
+#else
 	template<typename CharType, typename DelimType>
 	std::array<b_str<CharType>, 2> operator| (const b_str<CharType>& str, const split_helper_subroutine<split_at_last, DelimType, CharType>& info)
 	{
+		using StrType = b_str<CharType>;
+#endif
 		const auto pos = str.find_last_of(info.delim);
-		if (b_str<CharType>::npos == pos) return{ { {}, str } };
+		if (StrType::npos == pos) return{ { {}, str } };
 		return { { str.substr(0, str.find_last_not_of(info.delim, pos) + 1), str.substr(pos + 1) } };
 	}
 	//区切り文字1文字, operator[] or front()の時
