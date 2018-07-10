@@ -163,6 +163,13 @@ IUTEST_TYPED_TEST(StringViewSplit, chain_at_last_front_by_stl_str_view)
 	const auto re = s | split(std::basic_string_view<char_type>(constant::space_underscore<char_type>())) >> at_last().front();
 	IUTEST_ASSERT_EQ(constant::arikitari_na<char_type>(), re);
 }
+IUTEST_TYPED_TEST(StringViewSplit, chain_at_last_back)
+{
+	using char_type = TypeParam;
+	const std::basic_string_view<char_type> s = constant::cpp_type_data1<char_type>();
+	const auto re = s | split(constant::colon<char_type>()) >> at_last().back();
+	IUTEST_ASSERT_EQ(constant::ignore<char_type>(), re);
+}
 IUTEST_TYPED_TEST(StringViewSplit, ExtractBySingeChar)
 {
 	using char_type = TypeParam;
