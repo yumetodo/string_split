@@ -517,6 +517,17 @@ namespace detail {
 		return re;
 	}
 	//区切り文字複数の時
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<
+		typename StrType, typename DelimType, bool is_c_str, bool is_stl_string,
+		enable_if_t<!(is_c_str && is_stl_string) && type_traits::contract_str_type_v<
+			StrType,
+			typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type
+		>, std::nullptr_t> = nullptr
+	>
+	auto operator| (const StrType& str, const split_helper<DelimType, false, is_c_str, is_stl_string>& info) -> vector<StrType>
+	{
+#else
 	template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
 	auto operator| (const b_str<CharType>& str, const split_helper<DelimType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
@@ -524,11 +535,13 @@ namespace detail {
 			vector<b_str<CharType>>
 		>
 	{
-		vector<b_str<CharType>> re;
+		using StrType = b_str<CharType>;
+#endif
+		vector<StrType> re;
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
-			current != b_str<CharType>::npos && found != b_str<CharType>::npos;
+			current != StrType::npos && found != StrType::npos;
 			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
