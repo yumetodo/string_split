@@ -168,6 +168,8 @@ function(SETUP_TARGET_FOR_COVERAGE)
         COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage counters and generating report."
     )
 
+    # Register to clean coverage result
+    set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${Coverage_NAME}.info ${Coverage_NAME}.info.cleaned)
     # Show where to find the lcov info report
     add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
         COMMAND ;
