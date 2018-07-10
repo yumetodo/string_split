@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
   Copyright (C) 2016-2018 yumetodo
 
   Distributed under the Boost Software License, Version 1.0.
@@ -469,16 +469,26 @@ namespace detail {
 		re.emplace_back(str, pos, n);
 	}
 	//区切り文字1文字の時
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<
+		typename StrType, typename CharType,
+		enable_if_t<type_traits::contract_str_type_v<StrType, CharType>, std::nullptr_t> = nullptr
+	>
+	vector<StrType> operator| (const StrType& str, const split_helper<CharType, true, false, false>& info)
+	{
+#else
 	template<typename CharType>
 	vector<b_str<CharType>> operator| (const b_str<CharType>& str, const split_helper<CharType, true, false, false>& info)
 	{
-		vector<b_str<CharType>> re;
+		using StrType = b_str<CharType>;
+#endif
+		vector<StrType> re;
 		size_t current = 0;
-		for (size_t found; (found = str.find_first_of(info.delim, current)) != b_str<CharType>::npos; current = found + 1) {
+		for (size_t found; (found = str.find_first_of(info.delim, current)) != StrType::npos; current = found + 1) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
-			re.emplace_back(str, current, found - current);
+			vector_emplace_make_substr(re, str, current, found - current);
 		}
-		re.emplace_back(str, current, str.size() - current);
+		vector_emplace_make_substr(re, str, current, str.size() - current);
 		return re;
 	}
 	//区切り文字複数, has chain funcの時
