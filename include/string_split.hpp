@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
   Copyright (C) 2016-2018 yumetodo
 
   Distributed under the Boost Software License, Version 1.0.
@@ -456,6 +456,18 @@ namespace detail {
 		re.push_back(info.f(std::basic_string<CharType>(str, current, str.size() - current)));
 		return re;
 	}
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<typename CharType>
+	void vector_emplace_make_substr(vector<b_str_view<CharType>>& re, const b_str_view<CharType>& str, size_t pos, size_t n)
+	{
+		re.emplace_back(str.substr(pos, n));
+	}
+#endif
+	template<typename CharType>
+	void vector_emplace_make_substr(vector<b_str<CharType>>& re, const b_str<CharType>& str, size_t pos, size_t n)
+	{
+		re.emplace_back(str, pos, n);
+	}
 	//区切り文字1文字の時
 	template<typename CharType>
 	vector<b_str<CharType>> operator| (const b_str<CharType>& str, const split_helper<CharType, true, false, false>& info)
@@ -545,9 +557,9 @@ namespace detail {
 			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
-			re.emplace_back(str, current, found - current);
+			vector_emplace_make_substr(re, str, current, found - current);
 		}
-		re.emplace_back(str, current, str.size() - current);
+		vector_emplace_make_substr(re, str, current, str.size() - current);
 		return re;
 	}
 	//back()の時
