@@ -1,4 +1,4 @@
-#include "../include/string_split.hpp"
+﻿#include "../include/string_split.hpp"
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 #include "../iutest/include/iutest.hpp"
 #include "constant.hpp"
@@ -259,6 +259,20 @@ IUTEST_TYPED_TEST(StringViewSplit, ExtractByStlStrView)
 	IUTEST_EXPECT_THROW(s | split(delim)[std::numeric_limits<std::size_t>::max()], std::out_of_range);
 }
 #endif
+IUTEST_TYPED_TEST(StringViewSplit, SplitBySingeChar)
+{
+	using char_type = TypeParam;
+	const std::basic_string_view<char_type> s1 = constant::arikitari_na_world<char_type>();
+	const std::basic_string_view<char_type> re1_1[] = { constant::arikitari<char_type>(), constant::na<char_type>(), constant::world<char_type>() };
+	const auto re1_2 = s1 | split(constant::space<char_type>());
+	IUTEST_ASSERT_TRUE(std::equal(std::begin(re1_1), std::end(re1_1), re1_2.begin(), re1_2.end()));
+	if constexpr(!std::is_same_v<char_type, char>) {
+		const std::basic_string_view<char_type> s2 = constant::arikitarina_sekai<char_type>();
+		const std::basic_string_view<char_type> re2_1[] = { constant::arikitarina<char_type>(), constant::sekai<char_type>() };
+		const auto re2_2 = s2 | split(constant::space<char_type>());
+		IUTEST_ASSERT_TRUE(std::equal(std::begin(re2_1), std::end(re2_1), re2_2.begin(), re2_2.end()));
+	}
+}
 IUTEST_TYPED_TEST(StringViewSplit, SplitByCStr)
 {
 	using char_type = TypeParam;
