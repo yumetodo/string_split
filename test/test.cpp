@@ -343,6 +343,22 @@ IUTEST_TYPED_TEST(StringSplitLvalue, SplitByStlStr)
 	IUTEST_ASSERT_TRUE(std::equal(std::begin(re1_1), std::end(re1_1), re1_2.begin(), re1_2.end()));
 	StringSplitLvalue_SplitByStlStr::without_char<char_type>();
 }
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+IUTEST_TYPED_TEST(StringSplitLvalue, SplitByStlStrView)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s1 = constant::arikitari_na_world_underscore<char_type>();
+	const std::basic_string<char_type> re1_1[] = { constant::arikitari<char_type>(), constant::na<char_type>(), constant::world<char_type>() };
+	const auto re1_2 = s1 | split(std::basic_string_view<char_type>(constant::space_underscore<char_type>()));
+	IUTEST_ASSERT_TRUE(std::equal(std::begin(re1_1), std::end(re1_1), re1_2.begin(), re1_2.end()));
+	if constexpr(!std::is_same_v<char_type, char>) {
+		const std::basic_string<char_type> s2 = constant::arikitarina_sekai_wspace<char_type>();
+		const std::basic_string<char_type> re2_1[] = { constant::arikitarina<char_type>(), constant::sekai<char_type>() };
+		const auto re2_2 = s2 | split(std::basic_string<char_type>(constant::wspace<char_type>()));
+		IUTEST_ASSERT_TRUE(std::equal(std::begin(re2_1), std::end(re2_1), re2_2.begin(), re2_2.end()));
+	}
+}
+#endif
 template<typename T>
 struct StringSplitLvalueCovertToInt : public ::iutest::Test {};
 IUTEST_TYPED_TEST_CASE(StringSplitLvalueCovertToInt, ::iutest::Types<char, wchar_t>);
