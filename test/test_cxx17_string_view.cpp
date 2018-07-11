@@ -315,3 +315,23 @@ IUTEST_TYPED_TEST(StringViewSplit, SplitByStlStrView)
 		IUTEST_ASSERT_TRUE(std::equal(std::begin(re2_1), std::end(re2_1), re2_2.begin(), re2_2.end()));
 	}
 }
+IUTEST_TYPED_TEST(StringViewSplit, chain_func_by_single_char)
+{
+	using char_type = TypeParam;
+	const std::basic_string<char_type> s = constant::arikitari_na_world<char_type>();
+	const std::basic_string_view<char_type> sv = s;
+	std::vector<std::size_t> s_hash;
+	std::vector<std::size_t> sv_hash;
+	s_hash.reserve(3);
+	sv_hash.reserve(3);
+	s | split(constant::space<char_type>()) >> [&s_hash](const std::basic_string<char_type>& part) {
+		s_hash.emplace_back(std::hash<std::basic_string<char_type>>()(part));
+	};
+	sv | split(constant::space<char_type>()) >> [&sv_hash](const std::basic_string_view<char_type>& part) {
+		sv_hash.emplace_back(std::hash<std::basic_string_view<char_type>>()(part));
+	};
+	//These hashes equal the hashes of corresponding std::basic_string classes:
+	//If S is one of the standard basic_string types, SV is the corresponding string view type,
+	//and s is an object of type S, then std::hash<S>()(s) == std::hash<SV>()(SV(s)). 
+	IUTEST_ASSERT_TRUE(std::equal(s_hash.begin(), s_hash.end(), sv_hash.begin(), sv_hash.end()));
+}
