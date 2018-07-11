@@ -86,6 +86,88 @@ namespace detail {
 		template<typename T> struct is_stl_string<T const volatile> : is_stl_string<T> {};
 		template<typename CharType>
 		struct is_stl_string<b_str<CharType>> : std::integral_constant<bool, is_char_type<remove_cv_t<CharType>>::value> {};
+
+		namespace detail {
+			template <class T>
+			struct is_reference_wrapper : std::false_type {};
+			template <class U>
+			struct is_reference_wrapper<std::reference_wrapper<U>> : std::true_type {};
+
+			template<class T>
+			struct invoke_impl {
+				template<class F, class... Args>
+				static auto call(F&& f, Args&&... args)
+					-> decltype(std::forward<F>(f)(std::forward<Args>(args)...));
+			};
+
+			template<class B, class MT>
+			struct invoke_impl<MT B::*> {
+				template<class T, class Td = typename std::decay<T>::type,
+					class = typename std::enable_if<std::is_base_of<B, Td>::value>::type
+				>
+					static auto get(T&& t)->T&&;
+
+				template<class T, class Td = typename std::decay<T>::type,
+					class = typename std::enable_if<is_reference_wrapper<Td>::value>::type
+				>
+					static auto get(T&& t) -> decltype(t.get());
+
+				template<class T, class Td = typename std::decay<T>::type,
+					class = typename std::enable_if<!std::is_base_of<B, Td>::value>::type,
+					class = typename std::enable_if<!is_reference_wrapper<Td>::value>::type
+				>
+					static auto get(T&& t) -> decltype(*std::forward<T>(t));
+
+				template<class T, class... Args, class MT1,
+					class = typename std::enable_if<std::is_function<MT1>::value>::type
+				>
+					static auto call(MT1 B::*pmf, T&& t, Args&&... args)
+					-> decltype((invoke_impl::get(std::forward<T>(t)).*pmf)(std::forward<Args>(args)...));
+
+				template<class T>
+				static auto call(MT B::*pmd, T&& t)
+					-> decltype(invoke_impl::get(std::forward<T>(t)).*pmd);
+			};
+
+			template<class F, class... Args, class Fd = typename std::decay<F>::type>
+			auto INVOKE(F&& f, Args&&... args)
+				-> decltype(invoke_impl<Fd>::call(std::forward<F>(f), std::forward<Args>(args)...));
+
+		} // namespace detail
+
+		// Conforming C++14 implementation (is also a valid C++11 implementation):
+		namespace detail {
+			template <typename AlwaysVoid, typename, typename...>
+			struct invoke_result { };
+			template <typename F, typename...Args>
+			struct invoke_result<decltype(void(detail::INVOKE(std::declval<F>(), std::declval<Args>()...))),
+				F, Args...> {
+				using type = decltype(detail::INVOKE(std::declval<F>(), std::declval<Args>()...));
+			};
+		} // namespace detail
+
+		template <class F, class... ArgTypes>
+		struct invoke_result : detail::invoke_result<void, F, ArgTypes...> {};
+		template< class F, class... ArgTypes>
+		using invoke_result_t = typename invoke_result<F, ArgTypes...>::type;
+
+		template<class...> struct conjunction : std::true_type { };
+		template<class B1> struct conjunction<B1> : B1 { };
+		template<class B1, class... Bn>
+		struct conjunction<B1, Bn...>
+			: conditional_t<bool(B1::value), conjunction<Bn...>, B1> {};
+
+		template<class...> struct disjunction : std::false_type { };
+		template<class B1> struct disjunction<B1> : B1 { };
+		template<class B1, class... Bn>
+		struct disjunction<B1, Bn...>
+			: conditional_t<bool(B1::value), B1, disjunction<Bn...>> { };
+
+		template <bool B>
+		using bool_constant = std::integral_constant<bool, B>;
+
+		template<class B>
+		struct negation : bool_constant<!bool(B::value)> { };
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 		//
 		// is_stl_string_view
@@ -192,30 +274,22 @@ namespace detail {
 	template<typename CharType, typename FuncType>
 	struct split_helper_conv_func<CharType, FuncType, true, false, false> {
 		using char_type = CharType;
-		using result_type = decltype(std::declval<FuncType>()(std::declval<std::basic_string<char_type>>()));
-		static constexpr bool result_is_void = std::is_same<void, result_type>::value;
 		CharType delim; FuncType f;
 	};
 	template<typename CStr, typename FuncType>
 	struct split_helper_conv_func<CStr, FuncType, false, true, false> {
 		using char_type = remove_cv_t<remove_pointer_t<CStr>>;
-		using result_type = decltype(std::declval<FuncType>()(std::declval<std::basic_string<char_type>>()));
-		static constexpr bool result_is_void = std::is_same<void, result_type>::value;
 		const char_type* delim; FuncType f;
 	};
 	template<typename StlString, typename FuncType>
 	struct split_helper_conv_func<StlString, FuncType, false, false, true> {
 		using char_type = typename StlString::value_type;
-		using result_type = decltype(std::declval<FuncType>()(std::declval<std::basic_string<char_type>>()));
-		static constexpr bool result_is_void = std::is_same<void, result_type>::value;
 		b_str<char_type> delim; FuncType f;
 	};
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 	template<typename StlStringView, typename FuncType>
 	struct split_helper_conv_func<StlStringView, FuncType, false, false, false> {
 		using char_type = typename StlStringView::value_type;
-		using result_type = std::invoke_result_t<FuncType, std::basic_string_view<char_type>>;
-		static constexpr bool result_is_void = std::is_same<void, result_type>::value;
 		b_str<char_type> delim; FuncType f;
 	};
 #endif
@@ -426,7 +500,7 @@ namespace detail {
 	template<typename CharType, typename FuncType>
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			split_helper_conv_func<CharType, FuncType, true, false, false>::result_is_void,
+			std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>::value,
 			void
 		>
 	{
@@ -437,17 +511,14 @@ namespace detail {
 		info.f(std::basic_string<CharType>(str, current, str.size() - current));
 	}
 	//区切り文字1文字, has chain convert funcの時
-	template<
-		typename CharType, typename FuncType,
-		typename SplitHelperConvFunc = split_helper_conv_func<CharType, FuncType, true, false, false>
-	>
+	template<typename CharType, typename FuncType>
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			!SplitHelperConvFunc::result_is_void,
-			vector<typename SplitHelperConvFunc::result_type>
+			!std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>::value,
+			vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
 		>
 	{
-		vector<typename SplitHelperConvFunc::result_type> re;
+		vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>> re;
 		size_t current = 0;
 		for (size_t found; (found = str.find_first_of(info.delim, current)) != b_str<CharType>::npos; current = found + 1) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
@@ -494,12 +565,14 @@ namespace detail {
 	//区切り文字複数, has chain funcの時
 	template<
 		typename CharType, typename DelimType, typename FuncType,
-		bool is_c_str, bool is_stl_string,
-		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>
+		bool is_c_str, bool is_stl_string
 	>
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && is_same<CharType, typename SplitHelperConvFunc::char_type>::value && SplitHelperConvFunc::result_is_void,
+			(is_c_str || is_stl_string) && type_traits::conjunction<
+				is_same<CharType, typename split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>::char_type>,
+				std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
+			>::value,
 			void
 		>
 	{
@@ -516,16 +589,18 @@ namespace detail {
 	//区切り文字複数, has chain convert funcの時
 	template<
 		typename CharType, typename DelimType, typename FuncType,
-		bool is_c_str, bool is_stl_string,
-		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>
+		bool is_c_str, bool is_stl_string
 	>
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && is_same<CharType, typename SplitHelperConvFunc::char_type>::value && !SplitHelperConvFunc::result_is_void,
-			vector<typename SplitHelperConvFunc::result_type>
+			(is_c_str || is_stl_string) && type_traits::conjunction<
+				is_same<CharType, typename split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>::char_type>,
+				type_traits::negation<std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>>
+			>::value,
+			vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
 		>
 	{
-		vector<typename SplitHelperConvFunc::result_type> re;
+		vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>> re;
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
@@ -662,7 +737,7 @@ namespace detail {
 	template<typename CharType, typename FuncType>
 	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			split_helper_conv_func<CharType, FuncType, true, false, false>::result_is_void,
+			std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>::value,
 			void
 		>
 	{
@@ -680,11 +755,11 @@ namespace detail {
 	>
 	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			!SplitHelperConvFunc::result_is_void,
-			vector<typename SplitHelperConvFunc::result_type>
+			!std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>::value,
+			vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
 		>
 	{
-		vector<typename SplitHelperConvFunc::result_type> re;
+		vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>> re;
 		size_t current = 0;
 		for (size_t found; (found = str.find_first_of(info.delim, current)) != b_str<CharType>::npos; current = found + 1) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
@@ -711,12 +786,14 @@ namespace detail {
 	//区切り文字複数, has chain funcの時
 	template<
 		typename CharType, typename DelimType, typename FuncType,
-		bool is_c_str, bool is_stl_string,
-		typename SplitHelperConvFunc = split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>
+		bool is_c_str, bool is_stl_string
 	>
 	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && is_same<CharType, typename SplitHelperConvFunc::char_type>::value && SplitHelperConvFunc::result_is_void,
+			(is_c_str || is_stl_string) && type_traits::conjunction<
+				is_same<CharType, typename split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>::char_type>,
+				std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
+			>::value,
 			void
 		>
 	{
@@ -739,11 +816,14 @@ namespace detail {
 	>
 	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && is_same<CharType, typename SplitHelperConvFunc::char_type>::value && !SplitHelperConvFunc::result_is_void,
-			vector<typename SplitHelperConvFunc::result_type>
+			(is_c_str || is_stl_string) && type_traits::conjunction<
+				is_same<CharType, typename split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>::char_type>,
+				type_traits::negation<std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>>
+			>::value,
+			vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
 		>
 	{
-		vector<typename SplitHelperConvFunc::result_type> re;
+		vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>> re;
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
