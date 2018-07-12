@@ -527,6 +527,21 @@ namespace detail {
 		info.f(str.substr(current, str.size() - current));
 	}
 	//区切り文字1文字, has chain convert funcの時
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<
+		typename StrType, typename CharType, typename FuncType,
+		enable_if_t<
+			type_traits::conjunction<
+				type_traits::contract_str_type<StrType, CharType>,
+				type_traits::negation<std::is_void<type_traits::invoke_result_t<FuncType, StrType>>>
+			>::value,
+			std::nullptr_t
+		> = nullptr
+	>
+	auto operator| (const StrType& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
+		-> vector<type_traits::invoke_result_t<FuncType, StrType>>
+	{
+#else
 	template<typename CharType, typename FuncType>
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
@@ -534,13 +549,15 @@ namespace detail {
 			vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
 		>
 	{
-		vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>> re;
+		using StrType = b_str<CharType>;
+#endif
+		vector<type_traits::invoke_result_t<FuncType, StrType>> re;
 		size_t current = 0;
-		for (size_t found; (found = str.find_first_of(info.delim, current)) != b_str<CharType>::npos; current = found + 1) {
+		for (size_t found; (found = str.find_first_of(info.delim, current)) != StrType::npos; current = found + 1) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
-			re.push_back(info.f(std::basic_string<CharType>(str, current, found - current)));
+			re.emplace_back(info.f(str.substr(current, found - current)));
 		}
-		re.push_back(info.f(std::basic_string<CharType>(str, current, str.size() - current)));
+		re.emplace_back(info.f(str.substr(current, str.size() - current)));
 		return re;
 	}
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
