@@ -290,7 +290,7 @@ namespace detail {
 	template<typename StlStringView, typename FuncType>
 	struct split_helper_conv_func<StlStringView, FuncType, false, false, false> {
 		using char_type = typename StlStringView::value_type;
-		b_str<char_type> delim; FuncType f;
+		b_str_view<char_type> delim; FuncType f;
 	};
 #endif
 	template<typename DelimType, bool is_single_char, bool is_c_str, bool is_stl_string>
@@ -335,7 +335,7 @@ namespace detail {
 		b_str_view<char_type> delim;
 		split_helper_index<StlStringView, false, false, false> operator[](size_t n) const noexcept { return{ std::move(delim), n }; }
 		template<typename FuncType, enable_if_t<!is_subroutine<FuncType>::value, std::nullptr_t> = nullptr>
-		split_helper_conv_func<StlStringView, FuncType, false, false, true> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
+		split_helper_conv_func<StlStringView, FuncType, false, false, false> operator >> (FuncType&& f) const { return{ std::move(delim), std::forward<FuncType>(f) }; }
 		split_helper_index<StlStringView, false, false, false> operator>>(get_front) const noexcept { return{ std::move(delim), 0 }; }
 		template<typename Subroutine, enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
 		split_helper_subroutine<Subroutine, StlStringView, char_type> operator>> (Subroutine) const noexcept { return{ std::move(delim) }; }
@@ -579,6 +579,21 @@ namespace detail {
 		return re;
 	}
 	//区切り文字複数, has chain funcの時
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	template<
+		typename StrType, typename DelimType, typename FuncType,
+		bool is_c_str, bool is_stl_string,
+		enable_if_t<!(is_c_str && is_stl_string) && type_traits::conjunction<
+			type_traits::contract_str_type<
+				StrType,
+				typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type
+			>,
+			std::is_void<type_traits::invoke_result_t<FuncType, StrType>>
+		>::value, std::nullptr_t> = nullptr
+	>
+	void operator| (const StrType& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
+	{
+#else
 	template<
 		typename CharType, typename DelimType, typename FuncType,
 		bool is_c_str, bool is_stl_string
@@ -592,15 +607,17 @@ namespace detail {
 			void
 		>
 	{
+		using StrType = b_str<CharType>;
+#endif
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
-			current != b_str<CharType>::npos && found != b_str<CharType>::npos;
+			current != StrType::npos && found != StrType::npos;
 			current = str.find_first_not_of(info.delim, found + 1), found = str.find_first_of(info.delim, current)
 		) {
-			info.f(std::basic_string<CharType>(str, current, found - current));
+			info.f(str.substr(current, found - current));
 		}
-		info.f(std::basic_string<CharType>(str, current, str.size() - current));
+		info.f(str.substr(current, str.size() - current));
 	}
 	//区切り文字複数, has chain convert funcの時
 	template<
