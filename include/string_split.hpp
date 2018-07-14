@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
   Copyright (C) 2016-2018 yumetodo
 
   Distributed under the Boost Software License, Version 1.0.
@@ -49,6 +49,7 @@ namespace detail {
 #endif
 	using std::is_same;
 	using std::size_t;
+	using std::is_void;
 	template<bool con, typename T>
 	using enable_if_t = typename std::enable_if<con, T>::type;
 	template<bool con, typename T1, typename T2>
@@ -192,11 +193,15 @@ namespace detail {
 		//
 		template<typename StrType, typename CharType> struct contract_str_type : std::conjunction<
 			type_traits::is_stl_string_or_stl_string_view<StrType>,
-			std::is_same<CharType, typename StrType::value_type>
+			is_same<CharType, typename StrType::value_type>
 		> {};
 		template<typename StrType, typename CharType> constexpr bool contract_str_type_v = contract_str_type<StrType, CharType>::value;
 #endif
 	}
+#ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
+	using std::conjunction_v;
+#endif
+	using type_traits::invoke_result_t;
 	struct subroutine_base {};
 	template<typename T> struct is_subroutine : std::is_base_of<subroutine_base, T> {};
 	struct get_front : subroutine_base {};
@@ -340,7 +345,32 @@ namespace detail {
 		template<typename Subroutine, enable_if_t<is_subroutine<Subroutine>::value, std::nullptr_t> = nullptr>
 		split_helper_subroutine<Subroutine, StlStringView, char_type> operator>> (Subroutine) const noexcept { return{ std::move(delim) }; }
 	};
+	namespace type_traits {
+		//
+		//contract_str_type_and_delim_type_without_single_char
+		//
+		//is_c_str: true  && is_stl_string: true => impossible!!!
+		//is_c_str: true  && is_stl_string: false => const T*
+		//is_c_str: false && is_stl_string: true  => std::basic_string
+		//is_c_str: false && is_stl_string: false => std::basic_string_view
+		template<typename StrType, typename DelimType, bool is_c_str, bool is_stl_string>
+		struct contract_str_type_and_delim_type_without_single_char : conjunction<
+			contract_str_type<StrType, typename split_helper<DelimType, false, is_c_str, is_stl_string>::char_type>,
+			bool_constant<!(is_c_str && is_stl_string)>
+		>
+		{};
+		template<typename StrType, typename DelimType, bool is_c_str, bool is_stl_string>
+		constexpr bool contract_str_type_and_delim_type_without_single_char_v = contract_str_type_and_delim_type_without_single_char<StrType, DelimType, is_c_str, is_stl_string>::value;
+	}
 #endif
+	namespace type_traits {
+		template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
+		struct contract_delim_type_without_single_char : conjunction<
+			is_same<CharType, typename split_helper<DelimType, false, is_c_str, is_stl_string>::char_type>,
+			bool_constant<(is_c_str || is_stl_string)>
+		>
+		{};
+	}
 	//back()の時
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 	template<
