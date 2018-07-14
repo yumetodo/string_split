@@ -632,7 +632,7 @@ namespace detail {
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
 			type_traits::conjunction<
-				type_traits::contract_delim_type_without_single_char<CharType, DelimType, is_c_str, is_stl_string>
+				type_traits::contract_delim_type_without_single_char<CharType, DelimType, is_c_str, is_stl_string>,
 				is_void<invoke_result_t<FuncType, b_str<CharType>>>
 			>::value,
 			void
