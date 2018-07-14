@@ -1,4 +1,4 @@
-﻿#include "../include/string_split.hpp"
+#include "../include/string_split.hpp"
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 #include "../iutest/include/iutest.hpp"
 #include "constant.hpp"
@@ -335,7 +335,7 @@ IUTEST_TYPED_TEST(StringViewSplit, chain_func_by_single_char)
 	//and s is an object of type S, then std::hash<S>()(s) == std::hash<SV>()(SV(s)). 
 	IUTEST_ASSERT_TRUE(std::equal(s_hash.begin(), s_hash.end(), sv_hash.begin(), sv_hash.end()));
 }
-IUTEST_TYPED_TEST(StringViewSplit, chain_func_by_single_c_str)
+IUTEST_TYPED_TEST(StringViewSplit, chain_func_by_c_str)
 {
 	using char_type = TypeParam;
 	const std::basic_string<char_type> s = constant::arikitari_na_world_underscore<char_type>();
