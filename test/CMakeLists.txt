@@ -32,6 +32,8 @@ project(basic_test)
 #
 set(basic_test_src
     "./test.cpp"
+    "./test_lvalue.cpp"
+    "./test_rvalue.cpp"
 )
 if(CMAKE_CXX_STANDARD GREATER_EQUAL 17)
     message("C++17 sources enabled")
