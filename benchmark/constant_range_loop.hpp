@@ -8,10 +8,18 @@ Distributed under the Boost Software License, Version 1.0.
 #include <cstddef>
 #include <type_traits>
 #include <iterator>
+#if 201500 <= __cplusplus || (defined(_MSVC_LANG) && 201500 <= _MSVC_LANG)
+#	define CRL_CXX17_STD_ITERATPR_DEPRECATED
+#endif
 template<typename T, std::enable_if_t<std::is_arithmetic<T>::value, std::nullptr_t> = nullptr>
-class counter_iterator : std::iterator<std::random_access_iterator_tag, T> {
+class counter_iterator
+#ifndef CRL_CXX17_STD_ITERATPR_DEPRECATED
+	: std::iterator<std::random_access_iterator_tag, T>
+#endif
+{
 private:
 	T i;
+#ifndef CRL_CXX17_STD_ITERATPR_DEPRECATED
 	typedef std::iterator<std::random_access_iterator_tag, T> my_t;
 public:
 	typedef typename my_t::iterator_category iterator_category;
@@ -20,6 +28,14 @@ public:
 	typedef typename my_t::pointer pointer;
 	typedef typename my_t::reference reference;
 
+#else
+public:
+	using iterator_category = std::random_access_iterator_tag;
+	using value_type = T;
+	using difference_type = T;
+	using pointer = T*;
+	using reference = T&;
+#endif
 	constexpr counter_iterator() : i() { }
 	constexpr counter_iterator(T n) : i(n) { }
 	counter_iterator& operator=(const counter_iterator& o) noexcept {
