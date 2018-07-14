@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
   Copyright (C) 2016-2018 yumetodo
 
   Distributed under the Boost Software License, Version 1.0.
@@ -496,10 +496,7 @@ namespace detail {
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 	template<
 		typename StrType, typename DelimType, bool is_c_str, bool is_stl_string,
-		enable_if_t<!(is_c_str && is_stl_string) && type_traits::contract_str_type_v<
-			StrType,
-			typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type
-		>, std::nullptr_t> = nullptr
+		enable_if_t<type_traits::contract_str_type_and_delim_type_without_single_char_v<StrType, DelimType, is_c_str, is_stl_string>, std::nullptr_t> = nullptr
 	>
 	auto operator| (const StrType& str, const split_helper_index<DelimType, false, is_c_str, is_stl_string>& info) -> StrType
 	{
@@ -507,11 +504,7 @@ namespace detail {
 	template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
 	auto operator| (const b_str<CharType>& str, const split_helper_index<DelimType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			//is_c_str: true  && is_stl_string: true => impossible!!!
-			//is_c_str: true  && is_stl_string: false => const T*
-			//is_c_str: false && is_stl_string: true  => std::basic_string
-			//is_c_str: false && is_stl_string: false => std::basic_string_view
-			!(is_c_str && is_stl_string) && is_same<CharType, typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type>::value,
+			type_traits::contract_delim_type_without_single_char<CharType, DelimType, is_c_str, is_stl_string>::value,
 			b_str<CharType>
 		>
 	{
@@ -530,13 +523,10 @@ namespace detail {
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 	template<
 		typename StrType, typename CharType, typename FuncType,
-		enable_if_t<
-			type_traits::conjunction<
-				type_traits::contract_str_type<StrType, CharType>,
-				std::is_void<type_traits::invoke_result_t<FuncType, StrType>>
-			>::value,
-			std::nullptr_t
-		> = nullptr
+		enable_if_t<conjunction_v<
+			type_traits::contract_str_type<StrType, CharType>,
+			is_void<invoke_result_t<FuncType, StrType>>
+		>, std::nullptr_t> = nullptr
 	>
 	void operator| (const StrType& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 	{
@@ -544,7 +534,7 @@ namespace detail {
 	template<typename CharType, typename FuncType>
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>::value,
+			is_void<invoke_result_t<FuncType, b_str<CharType>>>::value,
 			void
 		>
 	{
@@ -560,28 +550,25 @@ namespace detail {
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 	template<
 		typename StrType, typename CharType, typename FuncType,
-		enable_if_t<
-			type_traits::conjunction<
-				type_traits::contract_str_type<StrType, CharType>,
-				type_traits::negation<std::is_void<type_traits::invoke_result_t<FuncType, StrType>>>
-			>::value,
-			std::nullptr_t
-		> = nullptr
+		enable_if_t<conjunction_v<
+			type_traits::contract_str_type<StrType, CharType>,
+			type_traits::negation<is_void<invoke_result_t<FuncType, StrType>>>
+		>, std::nullptr_t> = nullptr
 	>
 	auto operator| (const StrType& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
-		-> vector<type_traits::invoke_result_t<FuncType, StrType>>
+		-> vector<invoke_result_t<FuncType, StrType>>
 	{
 #else
 	template<typename CharType, typename FuncType>
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			!std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>::value,
-			vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
+			!is_void<invoke_result_t<FuncType, b_str<CharType>>>::value,
+			vector<invoke_result_t<FuncType, b_str<CharType>>>
 		>
 	{
 		using StrType = b_str<CharType>;
 #endif
-		vector<type_traits::invoke_result_t<FuncType, StrType>> re;
+		vector<invoke_result_t<FuncType, StrType>> re;
 		size_t current = 0;
 		for (size_t found; (found = str.find_first_of(info.delim, current)) != StrType::npos; current = found + 1) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
@@ -630,13 +617,10 @@ namespace detail {
 	template<
 		typename StrType, typename DelimType, typename FuncType,
 		bool is_c_str, bool is_stl_string,
-		enable_if_t<!(is_c_str && is_stl_string) && type_traits::conjunction<
-			type_traits::contract_str_type<
-				StrType,
-				typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type
-			>,
-			std::is_void<type_traits::invoke_result_t<FuncType, StrType>>
-		>::value, std::nullptr_t> = nullptr
+		enable_if_t<conjunction_v<
+			type_traits::contract_str_type_and_delim_type_without_single_char<StrType, DelimType, is_c_str, is_stl_string>,
+			is_void<invoke_result_t<FuncType, StrType>>
+		>, std::nullptr_t> = nullptr
 	>
 	void operator| (const StrType& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
 	{
@@ -647,9 +631,9 @@ namespace detail {
 	>
 	auto operator| (const b_str<CharType>& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && type_traits::conjunction<
-				is_same<CharType, typename split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>::char_type>,
-				std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
+			type_traits::conjunction<
+				type_traits::contract_delim_type_without_single_char<CharType, DelimType, is_c_str, is_stl_string>
+				is_void<invoke_result_t<FuncType, b_str<CharType>>>
 			>::value,
 			void
 		>
@@ -712,10 +696,7 @@ namespace detail {
 #ifdef STRING_SPLIT_HAS_CXX17_STRING_VIEW
 	template<
 		typename StrType, typename DelimType, bool is_c_str, bool is_stl_string,
-		enable_if_t<!(is_c_str && is_stl_string) && type_traits::contract_str_type_v<
-			StrType,
-			typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type
-		>, std::nullptr_t> = nullptr
+		enable_if_t<type_traits::contract_str_type_and_delim_type_without_single_char_v<StrType, DelimType, is_c_str, is_stl_string>, std::nullptr_t> = nullptr
 	>
 	auto operator| (const StrType& str, const split_helper<DelimType, false, is_c_str, is_stl_string>& info) -> vector<StrType>
 	{
@@ -723,7 +704,7 @@ namespace detail {
 	template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
 	auto operator| (const b_str<CharType>& str, const split_helper<DelimType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && is_same<CharType, typename split_helper<DelimType, false, is_c_str, is_stl_string>::char_type>::value,
+			type_traits::contract_delim_type_without_single_char<CharType, DelimType, is_c_str, is_stl_string>::value,
 			vector<b_str<CharType>>
 		>
 	{
@@ -813,7 +794,7 @@ namespace detail {
 	template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
 	auto operator| (b_str<CharType>&& str, const split_helper_index<DelimType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-		(is_c_str || is_stl_string) && is_same<CharType, typename split_helper_index<DelimType, false, is_c_str, is_stl_string>::char_type>::value,
+		type_traits::contract_delim_type_without_single_char<CharType, DelimType, is_c_str, is_stl_string>::value,
 		b_str<CharType>
 		>
 	{
@@ -832,7 +813,7 @@ namespace detail {
 	template<typename CharType, typename FuncType>
 	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>::value,
+			is_void<invoke_result_t<FuncType, b_str<CharType>>>::value,
 			void
 		>
 	{
@@ -850,11 +831,11 @@ namespace detail {
 	>
 	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<CharType, FuncType, true, false, false>& info)
 		-> enable_if_t<
-			!std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>::value,
-			vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
+			!is_void<invoke_result_t<FuncType, b_str<CharType>>>::value,
+			vector<invoke_result_t<FuncType, b_str<CharType>>>
 		>
 	{
-		vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>> re;
+		vector<invoke_result_t<FuncType, b_str<CharType>>> re;
 		size_t current = 0;
 		for (size_t found; (found = str.find_first_of(info.delim, current)) != b_str<CharType>::npos; current = found + 1) {
 			if (re.capacity() < re.size() + 1) re.reserve((std::numeric_limits<size_t>::max() / 2 < re.size()) ? std::numeric_limits<size_t>::max() : re.size() * 2);
@@ -885,9 +866,9 @@ namespace detail {
 	>
 	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && type_traits::conjunction<
-				is_same<CharType, typename split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>::char_type>,
-				std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
+			type_traits::conjunction<
+				type_traits::contract_delim_type_without_single_char<CharType, DelimType, is_c_str, is_stl_string>,
+				is_void<invoke_result_t<FuncType, b_str<CharType>>>
 			>::value,
 			void
 		>
@@ -911,14 +892,14 @@ namespace detail {
 	>
 	auto operator| (b_str<CharType>&& str, const split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && type_traits::conjunction<
-				is_same<CharType, typename split_helper_conv_func<DelimType, FuncType, false, is_c_str, is_stl_string>::char_type>,
-				type_traits::negation<std::is_void<type_traits::invoke_result_t<FuncType, b_str<CharType>>>>
+			type_traits::conjunction<
+				type_traits::contract_delim_type_without_single_char<CharType, DelimType, is_c_str, is_stl_string>,
+				type_traits::negation<is_void<invoke_result_t<FuncType, b_str<CharType>>>>
 			>::value,
-			vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>>
+			vector<invoke_result_t<FuncType, b_str<CharType>>>
 		>
 	{
-		vector<type_traits::invoke_result_t<FuncType, b_str<CharType>>> re;
+		vector<invoke_result_t<FuncType, b_str<CharType>>> re;
 		size_t current = 0;
 		for (
 			size_t found = str.find_first_of(info.delim, current);
@@ -936,7 +917,7 @@ namespace detail {
 	template<typename CharType, typename DelimType, bool is_c_str, bool is_stl_string>
 	auto operator| (b_str<CharType>&& str, const split_helper<DelimType, false, is_c_str, is_stl_string>& info)
 		-> enable_if_t<
-			(is_c_str || is_stl_string) && is_same<CharType, typename split_helper<DelimType, false, is_c_str, is_stl_string>::char_type>::value,
+			type_traits::contract_delim_type_without_single_char<CharType, DelimType, is_c_str, is_stl_string>::value,
 			vector<b_str<CharType>>
 		>
 	{
